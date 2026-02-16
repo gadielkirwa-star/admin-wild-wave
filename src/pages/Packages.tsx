@@ -1,38 +1,79 @@
 import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon } from 'lucide-react'
-import { db } from '../lib/db'
 import { formatCurrency } from '../lib/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import * as api from '../lib/api'
 
 export default function Packages() {
-  const { packages } = db
+  const [packages, setPackages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [editForm, setEditForm] = useState({ name: '', duration: '', price: 0, category: '', image: '' })
+  const [editForm, setEditForm] = useState({ 
+    name: '', 
+    duration: '', 
+    price: 0, 
+    category: '', 
+    image: '',
+    country: '',
+    tags: '',
+    bestMonths: '',
+    description: ''
+  })
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
-  const handleAdd = () => {
-    if (editForm.name && editForm.duration && editForm.price) {
-      packages.push({
-        id: Date.now().toString(),
-        name: editForm.name,
-        duration: editForm.duration,
-        price: editForm.price,
-        category: editForm.category || 'Luxury',
-        bookings: 0,
-        revenue: 0,
-        status: 'active',
-        image: editForm.image || 'https://images.unsplash.com/photo-1516426122078-c23e76319801'
-      })
-      setEditForm({ name: '', duration: '', price: 0, category: '', image: '' })
-      setImagePreview(null)
-      setShowAddModal(false)
+  useEffect(() => {
+    loadPackages()
+  }, [])
+
+  const loadPackages = async () => {
+    try {
+      const data = await api.getPackages()
+      setPackages(data)
+    } catch (error) {
+      console.error('Failed to load packages:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleEdit = (pkg: typeof packages[0]) => {
+  const handleAdd = async () => {
+    if (editForm.name && editForm.duration && editForm.price) {
+      try {
+        await api.createPackage({
+          name: editForm.name,
+          description: editForm.description,
+          price: editForm.price,
+          duration: editForm.duration,
+          image_url: editForm.image || 'https://images.unsplash.com/photo-1516426122078-c23e76319801',
+          category: editForm.category || 'Kenya',
+          country: editForm.country,
+          tags: editForm.tags,
+          best_months: editForm.bestMonths
+        })
+        await loadPackages()
+        setEditForm({ name: '', duration: '', price: 0, category: '', image: '', country: '', tags: '', bestMonths: '', description: '' })
+        setImagePreview(null)
+        setShowAddModal(false)
+      } catch (error) {
+        console.error('Failed to add package:', error)
+      }
+    }
+  }
+
+  const handleEdit = (pkg: any) => {
     setEditingId(pkg.id)
-    setEditForm({ name: pkg.name, duration: pkg.duration, price: pkg.price, category: pkg.category, image: pkg.image })
-    setImagePreview(pkg.image)
+    setEditForm({ 
+      name: pkg.name, 
+      duration: pkg.duration, 
+      price: pkg.price, 
+      category: pkg.category, 
+      image: pkg.image_url,
+      country: pkg.country || '',
+      tags: pkg.tags || '',
+      bestMonths: pkg.best_months || '',
+      description: pkg.description || ''
+    })
+    setImagePreview(pkg.image_url)
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,24 +89,40 @@ export default function Packages() {
     }
   }
 
-  const handleSave = (id: string) => {
-    const pkg = packages.find(p => p.id === id)
-    if (pkg) {
-      pkg.name = editForm.name
-      pkg.duration = editForm.duration
-      pkg.price = editForm.price
-      pkg.category = editForm.category
-      pkg.image = editForm.image
+  const handleSave = async (id: string) => {
+    try {
+      await api.updatePackage(id, {
+        name: editForm.name,
+        description: editForm.description,
+        price: editForm.price,
+        duration: editForm.duration,
+        image_url: editForm.image,
+        category: editForm.category,
+        country: editForm.country,
+        tags: editForm.tags,
+        best_months: editForm.bestMonths
+      })
+      await loadPackages()
+      setEditingId(null)
+      setImagePreview(null)
+    } catch (error) {
+      console.error('Failed to update package:', error)
     }
-    setEditingId(null)
-    setImagePreview(null)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this package?')) {
-      const index = packages.findIndex(p => p.id === id)
-      if (index > -1) packages.splice(index, 1)
+      try {
+        await api.deletePackage(id)
+        await loadPackages()
+      } catch (error) {
+        console.error('Failed to delete package:', error)
+      }
     }
+  }
+
+  if (loading) {
+    return <div className="p-6 text-center">Loading packages...</div>
   }
 
   return (
@@ -73,7 +130,7 @@ export default function Packages() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-safari-cream">Tour Packages</h1>
-          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage safari packages and itineraries</p>
+          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage safari packages and destinations</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -88,20 +145,14 @@ export default function Packages() {
         {packages.map((pkg) => (
           <div key={pkg.id} className="bg-white dark:bg-safari-charcoal rounded-2xl overflow-hidden card-shadow-lg border border-gray-100 dark:border-safari-brown/20 hover:shadow-xl transition-all">
             <div className="relative h-48 overflow-hidden group">
-              <img src={editingId === pkg.id && imagePreview ? imagePreview : pkg.image} alt={pkg.name} className="w-full h-full object-cover" />
+              <img src={editingId === pkg.id && imagePreview ? imagePreview : pkg.image_url} alt={pkg.name} className="w-full h-full object-cover" />
               {editingId === pkg.id && (
                 <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="text-center text-white">
                     <Upload className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm font-medium">Upload Image</p>
-                    <p className="text-xs opacity-75">Click to change</p>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               )}
               <div className="absolute top-4 right-4">
@@ -118,6 +169,13 @@ export default function Packages() {
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                     placeholder="Package name"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+                  />
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    placeholder="Description"
+                    rows={2}
                     className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
                   />
                   <input
@@ -139,44 +197,50 @@ export default function Packages() {
                     onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
                   >
-                    <option value="Luxury">Luxury</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Value">Value</option>
-                    <option value="Exclusive">Exclusive</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="Tanzania">Tanzania</option>
+                    <option value="Uganda">Uganda</option>
+                    <option value="Rwanda">Rwanda</option>
                   </select>
-                  <div className="flex items-center gap-2 p-3 border border-dashed rounded-lg dark:border-gray-700">
-                    <ImageIcon className="w-5 h-5 text-gray-400" />
-                    <label className="flex-1 cursor-pointer">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Change package image</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
+                  <input
+                    type="text"
+                    value={editForm.country}
+                    onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                    placeholder="Country"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+                  />
+                  <input
+                    type="text"
+                    value={editForm.tags}
+                    onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                    placeholder="Tags (e.g., Budget, Family Safaris)"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+                  />
+                  <input
+                    type="text"
+                    value={editForm.bestMonths}
+                    onChange={(e) => setEditForm({ ...editForm, bestMonths: e.target.value })}
+                    placeholder="Best months (e.g., Year-round)"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+                  />
                 </div>
               ) : (
                 <>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-safari-cream mb-2">{pkg.name}</h3>
-                  <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-gray-600 dark:text-safari-cream/60 mb-3">{pkg.description}</p>
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600 dark:text-safari-cream/60">{pkg.duration}</span>
                     <span className="text-2xl font-bold text-safari-gold">{formatCurrency(pkg.price)}</span>
                   </div>
+                  {pkg.best_months && (
+                    <p className="text-xs text-gray-500 dark:text-safari-cream/60 mb-2">Best: {pkg.best_months}</p>
+                  )}
+                  {pkg.tags && (
+                    <p className="text-xs text-safari-gold mb-4">{pkg.tags}</p>
+                  )}
                 </>
               )}
-              <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200 dark:border-safari-brown/20">
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-safari-cream/60">Bookings</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-safari-cream">{pkg.bookings}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-safari-cream/60">Revenue</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-safari-cream">{formatCurrency(pkg.revenue)}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-4">
                 {editingId === pkg.id ? (
                   <>
                     <button
@@ -220,29 +284,36 @@ export default function Packages() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 max-w-md w-full card-shadow-lg">
-            <h2 className="text-2xl font-bold text-safari-charcoal dark:text-safari-cream mb-4">Add New Package</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 max-w-md w-full card-shadow-lg my-8">
+            <h2 className="text-2xl font-bold text-safari-charcoal dark:text-safari-cream mb-4">Add New Destination</h2>
             <div className="space-y-4">
               <input
                 type="text"
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                placeholder="Package name"
+                placeholder="Destination name (e.g., Kigali)"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+              />
+              <textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder="Description"
+                rows={3}
                 className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
               />
               <input
                 type="text"
                 value={editForm.duration}
                 onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                placeholder="Duration (e.g., 7 days)"
+                placeholder="Duration (e.g., 2 days)"
                 className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
               />
               <input
                 type="number"
                 value={editForm.price || ''}
                 onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
-                placeholder="Price"
+                placeholder="Price (USD)"
                 className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
               />
               <select
@@ -250,16 +321,37 @@ export default function Packages() {
                 onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
               >
-                <option value="">Select category</option>
-                <option value="Luxury">Luxury</option>
-                <option value="Premium">Premium</option>
-                <option value="Value">Value</option>
-                <option value="Exclusive">Exclusive</option>
+                <option value="">Select region</option>
+                <option value="Kenya">Kenya</option>
+                <option value="Tanzania">Tanzania</option>
+                <option value="Uganda">Uganda</option>
+                <option value="Rwanda">Rwanda</option>
               </select>
+              <input
+                type="text"
+                value={editForm.country}
+                onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                placeholder="Country (e.g., Rwanda)"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+              />
+              <input
+                type="text"
+                value={editForm.tags}
+                onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                placeholder="Tags (e.g., Budget, Family Safaris)"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+              />
+              <input
+                type="text"
+                value={editForm.bestMonths}
+                onChange={(e) => setEditForm({ ...editForm, bestMonths: e.target.value })}
+                placeholder="Best months (e.g., Year-round)"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+              />
               <div className="flex items-center gap-2 p-3 border border-dashed rounded-lg dark:border-gray-700">
                 <ImageIcon className="w-5 h-5 text-gray-400" />
                 <label className="flex-1 cursor-pointer">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Upload package image</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Upload image or paste URL</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -268,6 +360,13 @@ export default function Packages() {
                   />
                 </label>
               </div>
+              <input
+                type="url"
+                value={editForm.image}
+                onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
+                placeholder="Or paste image URL"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
+              />
               {imagePreview && (
                 <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover rounded-lg" />
               )}
@@ -277,12 +376,12 @@ export default function Packages() {
                 onClick={handleAdd}
                 className="flex-1 px-4 py-2 safari-gradient text-white rounded-lg hover:opacity-90 transition-all"
               >
-                Add Package
+                Add Destination
               </button>
               <button
                 onClick={() => {
                   setShowAddModal(false)
-                  setEditForm({ name: '', duration: '', price: 0, category: '', image: '' })
+                  setEditForm({ name: '', duration: '', price: 0, category: '', image: '', country: '', tags: '', bestMonths: '', description: '' })
                   setImagePreview(null)
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
