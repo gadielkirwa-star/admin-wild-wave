@@ -1,13 +1,49 @@
 import { Package, DollarSign, Users, TrendingUp, Calendar } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useEffect, useState } from 'react'
 import StatCard from '../components/StatCard'
-import { db } from '../lib/db'
 import { formatCurrency, formatDate } from '../lib/utils'
+import * as api from '../lib/api'
 
 const COLORS = ['#D4A574', '#C17855', '#6B7F5C', '#4A5D3F', '#6B4E3D']
 
 export default function Dashboard() {
-  const { stats, recentBookings, revenueData, countryData } = db
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    loadDashboard()
+  }, [])
+
+  const loadDashboard = async () => {
+    try {
+      const data = await api.getDashboardStats()
+      setStats(data)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-safari-gold text-lg">Loading dashboard...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+        Error loading dashboard: {error}
+      </div>
+    )
+  }
+
+  if (!stats) return null
 
   return (
     <div className="space-y-8">
@@ -23,27 +59,27 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Bookings"
-          value={stats.totalBookings}
+          value={stats.totalBookings || 0}
           change={stats.bookingGrowth}
           icon={Package}
           color="bg-gradient-to-br from-safari-gold to-safari-terracotta"
         />
         <StatCard
           title="Total Revenue"
-          value={formatCurrency(stats.totalRevenue)}
+          value={formatCurrency(stats.totalRevenue || 0)}
           change={stats.revenueGrowth}
           icon={DollarSign}
           color="bg-gradient-to-br from-green-500 to-emerald-600"
         />
         <StatCard
           title="Active Tours"
-          value={stats.activeTours}
+          value={stats.activeTours || 0}
           icon={Calendar}
           color="bg-gradient-to-br from-blue-500 to-indigo-600"
         />
         <StatCard
           title="Total Customers"
-          value={stats.totalCustomers}
+          value={stats.totalCustomers || 0}
           icon={Users}
           color="bg-gradient-to-br from-purple-500 to-pink-600"
         />
@@ -53,7 +89,7 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 card-shadow-lg border border-gray-100 dark:border-safari-brown/20">
           <h2 className="text-xl font-bold text-gray-900 dark:text-safari-cream mb-6">Revenue Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={revenueData}>
+            <LineChart data={stats.revenueData || []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E8DCC4" opacity={0.2} />
               <XAxis dataKey="month" stroke="#6B4E3D" />
               <YAxis stroke="#6B4E3D" />
@@ -75,7 +111,7 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={countryData}
+                data={stats.countryData || []}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -84,7 +120,7 @@ export default function Dashboard() {
                 fill="#8884d8"
                 dataKey="bookings"
               >
-                {countryData.map((entry, index) => (
+                {(stats.countryData || []).map((entry: any, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -114,17 +150,17 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {recentBookings.map((booking) => (
+              {(stats.recentBookings || []).map((booking: any) => (
                 <tr key={booking.id} className="border-b border-gray-100 dark:border-safari-brown/10 hover:bg-gray-50 dark:hover:bg-safari-brown/10 transition-colors">
-                  <td className="py-4 px-4 text-sm font-mono text-gray-900 dark:text-safari-cream">{booking.ref}</td>
+                  <td className="py-4 px-4 text-sm font-mono text-gray-900 dark:text-safari-cream">{booking.ref || booking.id}</td>
                   <td className="py-4 px-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-safari-cream">{booking.customer}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-safari-cream">{booking.customer || booking.customer_name}</p>
                       <p className="text-xs text-gray-500 dark:text-safari-cream/60">{booking.email}</p>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-900 dark:text-safari-cream">{booking.package}</td>
-                  <td className="py-4 px-4 text-sm font-semibold text-gray-900 dark:text-safari-cream">{formatCurrency(booking.amount)}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900 dark:text-safari-cream">{booking.package || booking.safari_type}</td>
+                  <td className="py-4 px-4 text-sm font-semibold text-gray-900 dark:text-safari-cream">{formatCurrency(booking.amount || booking.total_price)}</td>
                   <td className="py-4 px-4">
                     <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                       booking.status === 'confirmed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
@@ -134,7 +170,7 @@ export default function Dashboard() {
                       {booking.status}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-600 dark:text-safari-cream/60">{formatDate(booking.date)}</td>
+                  <td className="py-4 px-4 text-sm text-gray-600 dark:text-safari-cream/60">{formatDate(booking.date || booking.created_at)}</td>
                 </tr>
               ))}
             </tbody>

@@ -7,17 +7,26 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const login = useStore((state) => state.login)
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
     
-    if (login(email, password)) {
-      navigate('/')
-    } else {
-      setError('Invalid email or password')
+    try {
+      const success = await login(email, password)
+      if (success) {
+        navigate('/')
+      } else {
+        setError('Invalid email or password')
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -72,10 +81,11 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full safari-gradient text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full safari-gradient text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <LogIn className="w-5 h-5" />
-              Sign In
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>

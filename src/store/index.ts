@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import * as api from '../lib/api'
 
 interface AppState {
   darkMode: boolean
@@ -7,14 +8,14 @@ interface AppState {
   user: { name: string; email: string } | null
   toggleDarkMode: () => void
   toggleSidebar: () => void
-  login: (email: string, password: string) => boolean
+  login: (email: string, password: string) => Promise<boolean>
   logout: () => void
 }
 
 export const useStore = create<AppState>((set) => ({
   darkMode: false,
   sidebarCollapsed: false,
-  isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
+  isAuthenticated: localStorage.getItem('authToken') !== null,
   user: JSON.parse(localStorage.getItem('user') || 'null'),
   toggleDarkMode: () => set((state) => {
     const newMode = !state.darkMode
@@ -22,18 +23,20 @@ export const useStore = create<AppState>((set) => ({
     return { darkMode: newMode }
   }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-  login: (email: string, password: string) => {
-    if (email === 'admin@wildwave.com' && password === 'admin123') {
-      const user = { name: 'Admin User', email }
-      localStorage.setItem('isAuthenticated', 'true')
+  login: async (email: string, password: string) => {
+    try {
+      const data = await api.login(email, password)
+      const user = { name: data.user.name || 'Admin User', email: data.user.email }
       localStorage.setItem('user', JSON.stringify(user))
       set({ isAuthenticated: true, user })
       return true
+    } catch (error) {
+      console.error('Login failed:', error)
+      return false
     }
-    return false
   },
   logout: () => {
-    localStorage.removeItem('isAuthenticated')
+    api.setAuthToken(null)
     localStorage.removeItem('user')
     set({ isAuthenticated: false, user: null })
   }
