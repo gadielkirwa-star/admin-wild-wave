@@ -18,40 +18,8 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      // Temporary: Use mock data until backend is ready
-      const mockData = {
-        totalBookings: 156,
-        totalRevenue: 487500,
-        activeTours: 12,
-        totalCustomers: 89,
-        bookingGrowth: 12.5,
-        revenueGrowth: 18.3,
-        revenueData: [
-          { month: 'Jan', revenue: 45000 },
-          { month: 'Feb', revenue: 52000 },
-          { month: 'Mar', revenue: 48000 },
-          { month: 'Apr', revenue: 61000 },
-          { month: 'May', revenue: 55000 },
-          { month: 'Jun', revenue: 68000 },
-        ],
-        countryData: [
-          { country: 'Kenya', bookings: 52, percentage: 33.3 },
-          { country: 'Tanzania', bookings: 45, percentage: 28.8 },
-          { country: 'Uganda', bookings: 32, percentage: 20.5 },
-          { country: 'Rwanda', bookings: 18, percentage: 11.5 },
-          { country: 'Others', bookings: 9, percentage: 5.9 },
-        ],
-        recentBookings: [
-          { id: 1, ref: 'WW-2026-001', customer: 'John Smith', email: 'john@example.com', package: 'Kenya Safari', amount: 3500, status: 'confirmed', date: '2026-03-15' },
-          { id: 2, ref: 'WW-2026-002', customer: 'Sarah Johnson', email: 'sarah@example.com', package: 'Tanzania Adventure', amount: 4200, status: 'pending', date: '2026-03-14' },
-          { id: 3, ref: 'WW-2026-003', customer: 'Mike Brown', email: 'mike@example.com', package: 'Uganda Gorilla Trek', amount: 5500, status: 'confirmed', date: '2026-03-13' },
-        ]
-      }
-      setStats(mockData)
-      
-      // TODO: Uncomment when backend is ready
-      // const data = await api.getDashboardStats()
-      // setStats(data)
+      const data = await api.getDashboardStats()
+      setStats(data)
     } catch (err: any) {
       setError(err.message)
     } finally {

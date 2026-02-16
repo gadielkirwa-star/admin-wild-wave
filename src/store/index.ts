@@ -25,23 +25,11 @@ export const useStore = create<AppState>((set) => ({
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   login: async (email: string, password: string) => {
     try {
-      // Temporary: Use mock authentication until backend is ready
-      if (email === 'admin@wildwavesafaris.com' && password === 'admin123') {
-        const mockToken = 'mock-jwt-token-' + Date.now()
-        api.setAuthToken(mockToken)
-        const user = { name: 'Admin User', email }
-        localStorage.setItem('user', JSON.stringify(user))
-        set({ isAuthenticated: true, user })
-        return true
-      }
-      return false
-      
-      // TODO: Uncomment when backend is ready
-      // const data = await api.login(email, password)
-      // const user = { name: data.user.name || 'Admin User', email: data.user.email }
-      // localStorage.setItem('user', JSON.stringify(user))
-      // set({ isAuthenticated: true, user })
-      // return true
+      const data = await api.login(email, password)
+      const user = { name: data.user.name || 'Admin User', email: data.user.email }
+      localStorage.setItem('user', JSON.stringify(user))
+      set({ isAuthenticated: true, user })
+      return true
     } catch (error) {
       console.error('Login failed:', error)
       return false
