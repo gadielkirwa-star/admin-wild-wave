@@ -13,10 +13,7 @@ interface Admin {
 }
 
 const initialAdmins: Admin[] = [
-  { id: '1', name: 'Super Admin', email: 'admin@wildwave.com', role: 'super-admin', status: 'active', createdAt: '2025-01-01', lastLogin: '2026-03-15' },
-  { id: '2', name: 'John Manager', email: 'john@wildwave.com', role: 'admin', status: 'active', createdAt: '2025-06-15', lastLogin: '2026-03-14' },
-  { id: '3', name: 'Sarah Support', email: 'sarah@wildwave.com', role: 'sub-admin', status: 'active', createdAt: '2025-09-20', lastLogin: '2026-03-13' },
-  { id: '4', name: 'Mike Assistant', email: 'mike@wildwave.com', role: 'sub-admin', status: 'suspended', createdAt: '2025-11-10', lastLogin: '2026-02-28' }
+  { id: '1', name: 'Admin User', email: 'admin@wildwavesafaris.com', role: 'super-admin', status: 'active', createdAt: '2025-01-01', lastLogin: '2026-03-15' }
 ];
 
 export default function AdminManagement() {

@@ -2,16 +2,10 @@ import { motion } from 'framer-motion';
 import { Search, MessageSquare, Clock, CheckCircle, User, Mail, Phone, Send } from 'lucide-react';
 import { useState } from 'react';
 
-const supportTickets = [
-  { id: '1', ticketId: 'SUP-2026-045', customer: 'Sarah Johnson', email: 'sarah@example.com', phone: '+1 555 0101', subject: 'Question about Masai Mara Safari', message: 'Hi, I would like to know if the Masai Mara package includes hot air balloon rides?', status: 'open', priority: 'high', date: '2026-03-15 10:30', replies: 0 },
-  { id: '2', ticketId: 'SUP-2026-044', customer: 'Michael Chen', email: 'michael@example.com', phone: '+44 20 1234', subject: 'Visa requirements for Kenya', message: 'What are the visa requirements for UK citizens traveling to Kenya?', status: 'pending', priority: 'medium', date: '2026-03-15 09:15', replies: 1 },
-  { id: '3', ticketId: 'SUP-2026-043', customer: 'Emma Williams', email: 'emma@example.com', phone: '+61 2 9876', subject: 'Group discount inquiry', message: 'Do you offer discounts for groups of 10 or more people?', status: 'resolved', priority: 'low', date: '2026-03-14 16:45', replies: 3 },
-  { id: '4', ticketId: 'SUP-2026-042', customer: 'James Brown', email: 'james@example.com', phone: '+1 555 0202', subject: 'Payment options', message: 'Can I pay in installments for the Serengeti Adventure package?', status: 'open', priority: 'high', date: '2026-03-14 14:20', replies: 0 },
-  { id: '5', ticketId: 'SUP-2026-041', customer: 'Lisa Anderson', email: 'lisa@example.com', phone: '+49 30 1234', subject: 'Best time to visit', message: 'When is the best time to visit for the Great Migration?', status: 'pending', priority: 'medium', date: '2026-03-14 11:00', replies: 1 }
-];
+const supportTickets: any[] = [];
 
 export default function Support() {
-  const [selectedTicket, setSelectedTicket] = useState(supportTickets[0]);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
 
   const openTickets = supportTickets.filter(t => t.status === 'open').length;
