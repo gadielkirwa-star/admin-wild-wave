@@ -1,12 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useStore } from '../store'
-import { LayoutDashboard, Package, MapPin, Users, DollarSign, Car, MessageSquare, Settings, UserCog, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Package, MapPin, Users, DollarSign, Car, MessageSquare, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navigation = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Bookings', path: '/bookings', icon: Package },
+  { name: 'Enquiries', path: '/enquiries', icon: Mail },
   { name: 'Tour Packages', path: '/packages', icon: MapPin },
+  { name: 'Safari Packages', path: '/safari-packages', icon: Briefcase },
+  { name: 'Blog Posts', path: '/blog', icon: FileText },
+  { name: 'Contact Info', path: '/contact-settings', icon: Phone },
+  { name: 'Promotions', path: '/promotions', icon: Megaphone },
   { name: 'Customers', path: '/customers', icon: Users },
   { name: 'Payments', path: '/payments', icon: DollarSign },
   { name: 'Guides & Vehicles', path: '/resources', icon: Car },

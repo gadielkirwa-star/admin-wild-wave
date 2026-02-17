@@ -164,6 +164,7 @@ export default function Packages() {
             <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
             <input type="text" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} placeholder="Duration" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
             <input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} placeholder="Price" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+            <input type="url" value={editForm.image} onChange={(e) => { setEditForm({ ...editForm, image: e.target.value }); setImagePreview(e.target.value); }} placeholder="Image URL" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
             <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
               <option value="Kenya">Kenya</option>
               <option value="Tanzania">Tanzania</option>

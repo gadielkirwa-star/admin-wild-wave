@@ -116,3 +116,102 @@ export const submitEnquiry = async (data: any) => {
     body: JSON.stringify(data),
   })
 }
+
+export const getPublicBlogs = async () => {
+  return fetchAPI('/public/blogs')
+}
+
+// Blogs (Admin)
+export const getBlogs = async () => {
+  return fetchAPI('/admin/blogs')
+}
+
+export const createBlog = async (data: any) => {
+  return fetchAPI('/admin/blogs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updateBlog = async (id: number, data: any) => {
+  return fetchAPI(`/admin/blogs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const deleteBlog = async (id: number) => {
+  return fetchAPI(`/admin/blogs/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// Contact Settings
+export const getContactSettings = async () => {
+  return fetchAPI('/admin/contact-settings')
+}
+
+export const updateContactSettings = async (data: any) => {
+  return fetchAPI('/admin/contact-settings', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const getPublicContactSettings = async () => {
+  return fetchAPI('/public/contact-settings')
+}
+
+// Packages (Admin)
+export const getPackagesAdmin = async () => {
+  return fetchAPI('/admin/packages')
+}
+
+export const createPackageAdmin = async (data: any) => {
+  return fetchAPI('/admin/packages', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updatePackageAdmin = async (id: number, data: any) => {
+  return fetchAPI(`/admin/packages/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const deletePackageAdmin = async (id: number) => {
+  return fetchAPI(`/admin/packages/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// Promotions
+export const getPromotions = async () => {
+  return fetchAPI('/admin/promotions')
+}
+
+export const createPromotion = async (data: any) => {
+  return fetchAPI('/admin/promotions', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updatePromotion = async (id: number, data: any) => {
+  return fetchAPI(`/admin/promotions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const deletePromotion = async (id: number) => {
+  return fetchAPI(`/admin/promotions/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+export const getActivePromotion = async () => {
+  return fetchAPI('/public/promotions')
+}
