@@ -23,9 +23,74 @@ export const db = {
 
   payments: [],
 
-  guides: [],
+  guides: [
+    {
+      id: 1,
+      name: 'Daniel Kiptoo',
+      specialization: 'Big Five & Birding',
+      rating: 4.9,
+      tours: 186,
+      phone: '+254 700 111 222',
+      email: 'daniel@wildwavesafaris.com',
+      languages: ['English', 'Swahili'],
+      status: 'available'
+    },
+    {
+      id: 2,
+      name: 'Amina Njoroge',
+      specialization: 'Family Safaris',
+      rating: 4.8,
+      tours: 142,
+      phone: '+254 700 222 333',
+      email: 'amina@wildwavesafaris.com',
+      languages: ['English', 'French', 'Swahili'],
+      status: 'on-tour'
+    },
+    {
+      id: 3,
+      name: 'Peter Mutesi',
+      specialization: 'Gorilla Trekking',
+      rating: 4.9,
+      tours: 121,
+      phone: '+254 700 333 444',
+      email: 'peter@wildwavesafaris.com',
+      languages: ['English', 'Kinyarwanda'],
+      status: 'available'
+    }
+  ],
 
-  vehicles: [],
+  vehicles: [
+    {
+      id: 1,
+      model: 'Toyota Land Cruiser',
+      type: '4x4 Safari Jeep',
+      plateNumber: 'KDA 102A',
+      capacity: 6,
+      year: 2022,
+      mileage: 45600,
+      status: 'available'
+    },
+    {
+      id: 2,
+      model: 'Land Rover Defender',
+      type: '4x4 Safari Jeep',
+      plateNumber: 'KDB 221F',
+      capacity: 6,
+      year: 2021,
+      mileage: 62400,
+      status: 'in-use'
+    },
+    {
+      id: 3,
+      model: 'Toyota Hiace',
+      type: 'Safari Van',
+      plateNumber: 'KDC 332H',
+      capacity: 9,
+      year: 2020,
+      mileage: 88200,
+      status: 'maintenance'
+    }
+  ],
 
   revenueData: [],
 

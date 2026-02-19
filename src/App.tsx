@@ -9,13 +9,13 @@ import SafariPackages from './pages/SafariPackages'
 import Customers from './pages/Customers'
 import Payments from './pages/Payments'
 import GuidesVehicles from './pages/GuidesVehicles'
-import Support from './pages/Support'
 import AdminManagement from './pages/AdminManagement'
 import Settings from './pages/Settings'
 import Blog from './pages/Blog'
 import ContactSettings from './pages/ContactSettings'
 import Enquiries from './pages/Enquiries'
 import Promotions from './pages/Promotions'
+import Support from './pages/Support'
 import Login from './pages/Login'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -55,10 +55,10 @@ export default function App() {
             <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
             <Route path="/contact-settings" element={<ProtectedRoute><ContactSettings /></ProtectedRoute>} />
             <Route path="/promotions" element={<ProtectedRoute><Promotions /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
             <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/resources" element={<ProtectedRoute><GuidesVehicles /></ProtectedRoute>} />
-            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/admins" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" />} />

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useStore } from '../store'
-import { LayoutDashboard, Package, MapPin, Users, DollarSign, Car, MessageSquare, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone } from 'lucide-react'
+import { LayoutDashboard, Package, MapPin, Users, DollarSign, Car, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const navigation = [
@@ -12,10 +12,10 @@ const navigation = [
   { name: 'Blog Posts', path: '/blog', icon: FileText },
   { name: 'Contact Info', path: '/contact-settings', icon: Phone },
   { name: 'Promotions', path: '/promotions', icon: Megaphone },
+  { name: 'Support', path: '/support', icon: LifeBuoy },
   { name: 'Customers', path: '/customers', icon: Users },
   { name: 'Payments', path: '/payments', icon: DollarSign },
   { name: 'Guides & Vehicles', path: '/resources', icon: Car },
-  { name: 'Support', path: '/support', icon: MessageSquare },
   { name: 'Admin Users', path: '/admins', icon: UserCog },
   { name: 'Settings', path: '/settings', icon: Settings }
 ]

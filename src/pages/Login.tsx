@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
-import { LogIn } from 'lucide-react'
+import { LogIn, Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const login = useStore((state) => state.login)
   const navigate = useNavigate()
 
@@ -53,7 +54,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@wildwave.com"
+                placeholder="admin@wildwavesafaris.com"
                 className="w-full px-4 py-3 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 focus:ring-2 focus:ring-safari-gold focus:border-transparent"
                 required
               />
@@ -63,14 +64,24 @@ export default function Login() {
               <label className="block text-sm font-medium text-gray-700 dark:text-safari-cream mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 focus:ring-2 focus:ring-safari-gold focus:border-transparent"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 focus:ring-2 focus:ring-safari-gold focus:border-transparent"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-safari-cream/70 hover:text-gray-700 dark:hover:text-safari-cream transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             {error && (

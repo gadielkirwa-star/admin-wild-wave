@@ -1,13 +1,71 @@
 import { motion } from 'framer-motion';
 import { Search, DollarSign, CreditCard, CheckCircle, Clock, XCircle, Download, FileText } from 'lucide-react';
-import { db } from '../lib/db';
+import { useEffect, useMemo, useState } from 'react';
+import * as api from '../lib/api';
 import { formatCurrency, formatDate } from '../lib/utils';
 
 export default function Payments() {
-  const payments = db.payments;
-  const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-  const completedPayments = payments.filter(p => p.status === 'completed').length;
-  const pendingPayments = payments.filter(p => p.status === 'pending').length;
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadBookings();
+  }, []);
+
+  const loadBookings = async () => {
+    try {
+      const data = await api.getBookings();
+      setBookings(data);
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load payments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const payments = useMemo(() => {
+    return bookings.map((booking) => {
+      let status = 'pending';
+      if (booking.status === 'confirmed' || booking.status === 'completed') status = 'completed';
+      if (booking.status === 'cancelled') status = 'failed';
+
+      return {
+        id: booking.id,
+        transactionId: `PAY-${booking.id}`,
+        customerName: booking.customer_name,
+        amount: Number(booking.total_price || 0),
+        method: 'Invoice',
+        status,
+        date: booking.created_at,
+      };
+    });
+  }, [bookings]);
+
+  const totalRevenue = payments
+    .filter((p) => p.status === 'completed')
+    .reduce((sum, p) => sum + p.amount, 0);
+  const completedPayments = payments.filter((p) => p.status === 'completed').length;
+  const pendingPayments = payments.filter((p) => p.status === 'pending').length;
+
+  if (loading) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
+        <div className="text-center py-12 text-gray-600 dark:text-gray-400">Loading payments...</div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+          Error loading payments: {error}
+        </div>
+      </motion.div>
+    );
+  }
 
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'width=800,height=600')

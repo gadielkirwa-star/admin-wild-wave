@@ -1,15 +1,48 @@
 import { motion } from 'framer-motion';
 import { Search, MessageSquare, Clock, CheckCircle, User, Mail, Phone, Send } from 'lucide-react';
-import { useState } from 'react';
-
-const supportTickets: any[] = [];
+import { useEffect, useMemo, useState } from 'react';
+import * as api from '../lib/api';
 
 export default function Support() {
+  const [enquiries, setEnquiries] = useState<any[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const openTickets = supportTickets.filter(t => t.status === 'open').length;
-  const pendingTickets = supportTickets.filter(t => t.status === 'pending').length;
+  useEffect(() => {
+    loadEnquiries();
+  }, []);
+
+  const loadEnquiries = async () => {
+    try {
+      const data = await api.getEnquiries();
+      setEnquiries(data);
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load support tickets');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const supportTickets = useMemo(() => {
+    return enquiries.map((item) => ({
+      id: item.id,
+      ticketId: `ENQ-${item.id}`,
+      customer: item.name,
+      email: item.email,
+      phone: item.phone || 'N/A',
+      subject: item.subject || 'General Inquiry',
+      message: item.message,
+      status: item.status || 'new',
+      date: new Date(item.created_at).toLocaleString(),
+      replies: 0,
+    }));
+  }, [enquiries]);
+
+  const openTickets = supportTickets.filter(t => t.status === 'new').length;
+  const pendingTickets = supportTickets.filter(t => t.status === 'contacted').length;
   const resolvedTickets = supportTickets.filter(t => t.status === 'resolved').length;
 
   const handleSendReply = () => {
@@ -18,6 +51,22 @@ export default function Support() {
       setReplyMessage('');
     }
   };
+
+  if (loading) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading support tickets...</div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">{error}</div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
@@ -82,8 +131,8 @@ export default function Support() {
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{ticket.subject}</p>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      ticket.status === 'open' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
-                      ticket.status === 'pending' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                      ticket.status === 'new' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                      ticket.status === 'contacted' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                     }`}>
                       {ticket.status}
@@ -109,8 +158,8 @@ export default function Support() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTicket.ticketId}</p>
                   </div>
                   <select className="px-3 py-1 border rounded-lg text-sm dark:bg-safari-charcoal dark:border-gray-700">
-                    <option value="open">Open</option>
-                    <option value="pending">Pending</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
                     <option value="resolved">Resolved</option>
                   </select>
                 </div>
