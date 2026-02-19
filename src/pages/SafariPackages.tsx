@@ -1,4 +1,4 @@
-import { Plus, Edit, Trash2, X, Save, Upload } from 'lucide-react'
+import { Plus, Edit, Trash2, X, Save, Upload, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
 
@@ -7,6 +7,7 @@ export default function SafariPackages() {
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [editForm, setEditForm] = useState({ 
     name: '', 
     duration: '', 
@@ -87,6 +88,24 @@ export default function SafariPackages() {
     }
   }
 
+  const handleSyncDestinationImages = async () => {
+    setSyncing(true)
+    try {
+      const result = await api.syncDestinationImagesFromPackages()
+      alert(
+        `Sync complete.\n` +
+        `Packages checked: ${result.sourceCount}\n` +
+        `Destinations updated: ${result.updatedCount}\n` +
+        `No matching destination name: ${result.unmatchedCount}`
+      )
+    } catch (error) {
+      console.error('Failed to sync destination images:', error)
+      alert('Failed to sync destination images. Please try again.')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   if (loading) {
     return <div className="p-6 text-center">Loading packages...</div>
   }
@@ -98,13 +117,23 @@ export default function SafariPackages() {
           <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-safari-cream">Safari Packages</h1>
           <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage complete safari itineraries with pricing</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 safari-gradient text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Add Package
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSyncDestinationImages}
+            disabled={syncing}
+            className="px-4 py-2 border border-safari-gold text-safari-gold rounded-xl font-medium hover:bg-safari-gold hover:text-white transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+            {syncing ? 'Syncing...' : 'Sync Images to Destinations'}
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 safari-gradient text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Add Package
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

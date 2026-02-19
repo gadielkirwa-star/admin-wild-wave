@@ -1,4 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://wildwave-safaris-api.onrender.com/api'
+    : 'http://localhost:5000/api')
 
 let authToken: string | null = localStorage.getItem('authToken')
 
@@ -187,6 +191,12 @@ export const deletePackageAdmin = async (id: number) => {
   })
 }
 
+export const syncDestinationImagesFromPackages = async () => {
+  return fetchAPI('/admin/packages/sync-destination-images', {
+    method: 'POST',
+  })
+}
+
 // Promotions
 export const getPromotions = async () => {
   return fetchAPI('/admin/promotions')
@@ -214,4 +224,27 @@ export const deletePromotion = async (id: number) => {
 
 export const getActivePromotion = async () => {
   return fetchAPI('/public/promotions')
+}
+
+// Admin Users
+export const getAdminUsers = async () => {
+  return fetchAPI('/admin/users')
+}
+
+export const createAdminUser = async (data: any) => {
+  return fetchAPI('/admin/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const deleteAdminUser = async (id: number) => {
+  return fetchAPI(`/admin/users/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// Customers
+export const getCustomers = async () => {
+  return fetchAPI('/admin/customers')
 }
