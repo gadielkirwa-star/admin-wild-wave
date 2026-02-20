@@ -115,7 +115,7 @@ export default function SafariPackages() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-safari-cream">Safari Packages</h1>
-          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage complete safari itineraries with pricing</p>
+          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage package pricing, itineraries, and inclusions</p>
         </div>
         <div className="flex gap-2">
           <button

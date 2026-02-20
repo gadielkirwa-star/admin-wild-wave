@@ -50,8 +50,9 @@ export default function App() {
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
             <Route path="/enquiries" element={<ProtectedRoute><Enquiries /></ProtectedRoute>} />
-            <Route path="/packages" element={<ProtectedRoute><Packages /></ProtectedRoute>} />
-            <Route path="/safari-packages" element={<ProtectedRoute><SafariPackages /></ProtectedRoute>} />
+            <Route path="/destinations" element={<ProtectedRoute><Packages /></ProtectedRoute>} />
+            <Route path="/packages" element={<ProtectedRoute><SafariPackages /></ProtectedRoute>} />
+            <Route path="/safari-packages" element={<Navigate to="/packages" replace />} />
             <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
             <Route path="/contact-settings" element={<ProtectedRoute><ContactSettings /></ProtectedRoute>} />
             <Route path="/promotions" element={<ProtectedRoute><Promotions /></ProtectedRoute>} />

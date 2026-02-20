@@ -78,16 +78,8 @@ export default function Packages() {
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string
-        setImagePreview(result)
-        setEditForm({ ...editForm, image: result })
-      }
-      reader.readAsDataURL(file)
-    }
+    // File upload disabled - use URLs only for persistence
+    console.warn('File uploads are not supported. Please use image URLs from Unsplash or other hosting.');
   }
 
   const handleSave = async (id: string) => {
@@ -142,15 +134,6 @@ export default function Packages() {
     <div key={pkg.id} className="bg-white dark:bg-safari-charcoal rounded-2xl overflow-hidden card-shadow-lg border border-gray-100 dark:border-safari-brown/20 hover:shadow-xl transition-all">
       <div className="relative h-48 overflow-hidden group">
         <img src={editingId === pkg.id && imagePreview ? imagePreview : pkg.image_url} alt={pkg.name} className="w-full h-full object-cover" />
-        {editingId === pkg.id && (
-          <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="text-center text-white">
-              <Upload className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm font-medium">Upload Image</p>
-            </div>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-          </label>
-        )}
         <div className="absolute top-4 right-4">
           <span className="px-3 py-1 bg-safari-gold text-white text-xs font-bold rounded-full">
             {editingId === pkg.id ? editForm.category : pkg.category}
@@ -164,7 +147,10 @@ export default function Packages() {
             <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
             <input type="text" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} placeholder="Duration" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
             <input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} placeholder="Price" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
-            <input type="url" value={editForm.image} onChange={(e) => { setEditForm({ ...editForm, image: e.target.value }); setImagePreview(e.target.value); }} placeholder="Image URL" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+            <div>
+              <input type="url" value={editForm.image} onChange={(e) => { setEditForm({ ...editForm, image: e.target.value }); setImagePreview(e.target.value); }} placeholder="Image URL (e.g., https://images.unsplash.com/...)" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+              <p className="text-xs text-muted-foreground mt-1">💡 Tip: Get free images from unsplash.com or use existing URLs</p>
+            </div>
             <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
               <option value="Kenya">Kenya</option>
               <option value="Tanzania">Tanzania</option>
@@ -208,8 +194,8 @@ export default function Packages() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-safari-cream">Tour Packages</h1>
-          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage safari packages and destinations</p>
+          <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-safari-cream">Destinations</h1>
+          <p className="text-gray-600 dark:text-safari-cream/60 mt-1">Manage destination listings for the main site</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
