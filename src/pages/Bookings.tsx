@@ -1,15 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Filter, Download, FileText } from 'lucide-react'
-import { db, updateBookingStatus, assignGuide } from '../lib/db'
+import * as api from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 
 export default function Bookings() {
-  const [bookings, setBookings] = useState(db.recentBookings)
+  const [bookings, setBookings] = useState<any[]>([])
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const handleStatusChange = (id: string, status: string) => {
-    updateBookingStatus(id, status)
-    setBookings([...db.recentBookings])
+  useEffect(() => {
+    loadBookings()
+  }, [])
+
+  const loadBookings = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const data = await api.getBookings() as any
+      const normalized = Array.isArray(data) ? data : (Array.isArray(data?.bookings) ? data.bookings : [])
+      setBookings(normalized)
+      if (!Array.isArray(data) && !Array.isArray(data?.bookings)) {
+        setError('Unexpected bookings response from API')
+      }
+    } catch (err: any) {
+      const message = err?.message || 'Failed to load bookings'
+      console.error('Failed to load bookings:', err)
+      setError(message)
+      setBookings([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleStatusChange = async (id: number, status: string) => {
+    try {
+      await api.updateBookingStatus(id, status)
+      loadBookings()
+    } catch (error) {
+      console.error('Failed to update status:', error)
+    }
   }
 
   const exportToCSV = () => {
@@ -103,6 +133,17 @@ export default function Bookings() {
     }, 250)
   }
 
+  const filteredBookings = bookings.filter((booking) => {
+    const q = search.trim().toLowerCase()
+    if (!q) return true
+    return (
+      String(booking.id || '').toLowerCase().includes(q) ||
+      String(booking.customer_name || '').toLowerCase().includes(q) ||
+      String(booking.email || '').toLowerCase().includes(q) ||
+      String(booking.safari_type || '').toLowerCase().includes(q)
+    )
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -146,6 +187,24 @@ export default function Bookings() {
           </button>
         </div>
 
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            Error loading bookings: {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+            Loading bookings...
+          </div>
+        )}
+
+        {!loading && !error && filteredBookings.length === 0 && (
+          <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:bg-safari-brown/10 dark:text-safari-cream/70">
+            No bookings found.
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -154,26 +213,26 @@ export default function Bookings() {
                 <th className="text-left py-3 px-4 text-sm font-semibold">Customer</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold">Package</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold">People</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold">Start Date</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold">Amount</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold">Guide</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold">Status</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold">Date</th>
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <tr key={booking.id} className="border-b border-gray-100 dark:border-safari-brown/10 hover:bg-gray-50 dark:hover:bg-safari-brown/10">
-                  <td className="py-4 px-4 font-mono text-sm">{booking.ref}</td>
+                  <td className="py-4 px-4 font-mono text-sm">#{booking.id}</td>
                   <td className="py-4 px-4">
                     <div>
-                      <p className="font-medium text-sm">{booking.customer}</p>
+                      <p className="font-medium text-sm">{booking.customer_name}</p>
                       <p className="text-xs text-gray-500 dark:text-safari-cream/60">{booking.email}</p>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-sm">{booking.package}</td>
-                  <td className="py-4 px-4 text-sm">{booking.people}</td>
-                  <td className="py-4 px-4 font-semibold text-sm">{formatCurrency(booking.amount)}</td>
-                  <td className="py-4 px-4 text-sm">{booking.guide}</td>
+                  <td className="py-4 px-4 text-sm">{booking.safari_type}</td>
+                  <td className="py-4 px-4 text-sm">{booking.number_of_people}</td>
+                  <td className="py-4 px-4 text-sm">{booking.start_date ? formatDate(booking.start_date) : 'TBD'}</td>
+                  <td className="py-4 px-4 font-semibold text-sm">{formatCurrency(booking.total_price || 0)}</td>
                   <td className="py-4 px-4">
                     <select
                       value={booking.status}
@@ -186,7 +245,7 @@ export default function Bookings() {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-600 dark:text-safari-cream/60">{formatDate(booking.date)}</td>
+                  <td className="py-4 px-4 text-sm text-gray-600 dark:text-safari-cream/60">{formatDate(booking.created_at)}</td>
                 </tr>
               ))}
             </tbody>
