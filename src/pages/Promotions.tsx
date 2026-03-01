@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Tag } from 'lucide-react'
+import { Plus, Edit2, Trash2, Tag, Upload, Image as ImageIcon } from 'lucide-react'
 import * as api from '../lib/api'
 
 export default function Promotions() {
   const [promotions, setPromotions] = useState<any[]>([])
   const [editing, setEditing] = useState<any>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
-    title: '', description: '', discount_text: '', button_text: 'Book Now', button_link: '/contact', active: true
+    title: '',
+    description: '',
+    info_text: '',
+    image_url: '',
+    discount_text: '',
+    button_text: 'Book Now',
+    button_link: '/contact',
+    active: true
   })
 
   useEffect(() => {
@@ -30,8 +39,18 @@ export default function Promotions() {
       } else {
         await api.createPromotion(formData)
       }
-      setFormData({ title: '', description: '', discount_text: '', button_text: 'Book Now', button_link: '/contact', active: true })
+      setFormData({
+        title: '',
+        description: '',
+        info_text: '',
+        image_url: '',
+        discount_text: '',
+        button_text: 'Book Now',
+        button_link: '/contact',
+        active: true
+      })
       setEditing(null)
+      setImagePreview(null)
       loadPromotions()
     } catch (error) {
       console.error('Failed to save promotion:', error)
@@ -43,11 +62,36 @@ export default function Promotions() {
     setFormData({
       title: promo.title,
       description: promo.description || '',
+      info_text: promo.info_text || '',
+      image_url: promo.image_url || '',
       discount_text: promo.discount_text || '',
       button_text: promo.button_text || 'Book Now',
       button_link: promo.button_link || '/contact',
       active: promo.active
     })
+    setImagePreview(promo.image_url || null)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const localPreview = URL.createObjectURL(file)
+    setImagePreview(localPreview)
+    setUploading(true)
+
+    try {
+      const uploaded = await api.uploadImage(file)
+      const imageUrl = uploaded?.url || uploaded?.path || ''
+      setFormData((prev) => ({ ...prev, image_url: imageUrl }))
+      setImagePreview(imageUrl || localPreview)
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      alert('Image upload failed. Please try again.')
+      setImagePreview(null)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleDelete = async (id: number) => {
@@ -104,6 +148,48 @@ export default function Promotions() {
               placeholder="Book your educational safari adventure at an unbeatable price!"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Extra Info (small text shown on popup)</label>
+            <input
+              type="text"
+              value={formData.info_text}
+              onChange={(e) => setFormData({ ...formData, info_text: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-safari-brown/20 bg-white dark:bg-safari-brown/10"
+              placeholder="Limited seats available this month"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Promotion Image</label>
+            <div className="flex items-center gap-2 p-3 border border-dashed rounded-lg dark:border-safari-brown/30 mb-2">
+              <ImageIcon className="w-5 h-5 text-gray-400" />
+              <label className="flex-1 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+                Upload image
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+              <Upload className="w-4 h-4 text-gray-400" />
+            </div>
+            <input
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => {
+                const value = e.target.value
+                setFormData({ ...formData, image_url: value })
+                setImagePreview(value || null)
+              }}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-safari-brown/20 bg-white dark:bg-safari-brown/10"
+              placeholder="Or paste image URL"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Promotion preview"
+                className="mt-3 w-full h-40 object-cover rounded-lg border border-gray-200 dark:border-safari-brown/20"
+              />
+            )}
+            {uploading && (
+              <p className="mt-2 text-xs text-safari-gold">Uploading image...</p>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Button Text</label>
@@ -142,7 +228,17 @@ export default function Promotions() {
                 type="button"
                 onClick={() => {
                   setEditing(null)
-                  setFormData({ title: '', description: '', discount_text: '', button_text: 'Book Now', button_link: '/contact', active: true })
+                  setFormData({
+                    title: '',
+                    description: '',
+                    info_text: '',
+                    image_url: '',
+                    discount_text: '',
+                    button_text: 'Book Now',
+                    button_link: '/contact',
+                    active: true
+                  })
+                  setImagePreview(null)
                 }}
                 className="px-6 py-2 border border-gray-200 dark:border-safari-brown/20 rounded-xl"
               >
@@ -177,6 +273,16 @@ export default function Promotions() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-safari-cream/60 mb-2">{promo.description}</p>
+                  {promo.info_text && (
+                    <p className="text-xs text-safari-terracotta dark:text-safari-gold mb-2">{promo.info_text}</p>
+                  )}
+                  {promo.image_url && (
+                    <img
+                      src={promo.image_url}
+                      alt={promo.title}
+                      className="mb-2 h-24 w-full max-w-xs object-cover rounded-lg border border-gray-200 dark:border-safari-brown/20"
+                    />
+                  )}
                   <div className="text-xs text-gray-500">
                     Button: "{promo.button_text}" → {promo.button_link}
                   </div>

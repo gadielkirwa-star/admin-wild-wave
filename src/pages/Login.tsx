@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
 
+const LOGO_URL = 'https://www.dropbox.com/scl/fi/hx1jqsxef1zz940ibzktk/wb.jpeg?rlkey=teccg3icp4p289k6q3g5w65w2&st=euyvj5ja&raw=1'
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +38,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
-            src="https://i.pinimg.com/736x/b7/4d/e4/b74de494b7a34e81af1cb59309b42b6f.jpg" 
+            src={LOGO_URL}
             alt="WildWave Logo" 
             className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 shadow-lg"
           />

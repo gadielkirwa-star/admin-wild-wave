@@ -1,63 +1,66 @@
 import { motion } from 'framer-motion';
-import { Plus, Edit, Shield, ShieldAlert, UserX, UserCheck, Search, Mail, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, Edit, Shield, ShieldAlert, UserX, UserCheck, Search, Mail, Calendar, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import * as api from '../lib/api';
 
 interface Admin {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: 'super-admin' | 'admin' | 'sub-admin';
-  status: 'active' | 'suspended' | 'blocked';
-  createdAt: string;
-  lastLogin: string;
+  role: string;
+  created_at: string;
 }
 
-const initialAdmins: Admin[] = [
-  { id: '1', name: 'Admin User', email: 'admin@wildwavesafaris.com', role: 'super-admin', status: 'active', createdAt: '2025-01-01', lastLogin: '2026-03-15' }
-];
-
 export default function AdminManagement() {
-  const [admins, setAdmins] = useState<Admin[]>(initialAdmins);
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', role: 'sub-admin' as const });
+  const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', role: 'sub-admin' });
 
-  const handleAddAdmin = () => {
-    if (newAdmin.name && newAdmin.email && newAdmin.password) {
-      const admin: Admin = {
-        id: Date.now().toString(),
-        name: newAdmin.name,
-        email: newAdmin.email,
-        role: newAdmin.role,
-        status: 'active',
-        createdAt: new Date().toISOString().split('T')[0],
-        lastLogin: 'Never'
-      };
-      setAdmins([...admins, admin]);
-      setNewAdmin({ name: '', email: '', password: '', role: 'sub-admin' });
-      setShowAddModal(false);
+  useEffect(() => {
+    loadAdmins();
+  }, []);
+
+  const loadAdmins = async () => {
+    try {
+      const data = await api.getAdminUsers();
+      setAdmins(data);
+    } catch (error) {
+      console.error('Failed to load admins:', error);
     }
   };
 
-  const updateStatus = (id: string, status: Admin['status']) => {
-    setAdmins(admins.map(a => a.id === id ? { ...a, status } : a));
+  const handleAddAdmin = async () => {
+    if (newAdmin.name && newAdmin.email && newAdmin.password) {
+      try {
+        await api.createAdminUser(newAdmin);
+        setNewAdmin({ name: '', email: '', password: '', role: 'sub-admin' });
+        setShowAddModal(false);
+        loadAdmins();
+      } catch (error) {
+        console.error('Failed to create admin:', error);
+        alert('Failed to create admin');
+      }
+    }
   };
 
-  const getRoleBadge = (role: Admin['role']) => {
-    const styles = {
+  const handleDelete = async (id: number) => {
+    if (confirm('Delete this admin user?')) {
+      try {
+        await api.deleteAdminUser(id);
+        loadAdmins();
+      } catch (error) {
+        console.error('Failed to delete admin:', error);
+      }
+    }
+  };
+
+  const getRoleBadge = (role: string) => {
+    const styles: any = {
       'super-admin': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
       'admin': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
       'sub-admin': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
     };
-    return styles[role];
-  };
-
-  const getStatusBadge = (status: Admin['status']) => {
-    const styles = {
-      'active': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      'suspended': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      'blocked': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-    };
-    return styles[status];
+    return styles[role] || styles['sub-admin'];
   };
 
   return (
@@ -76,7 +79,7 @@ export default function AdminManagement() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-safari-charcoal p-6 rounded-lg card-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -89,19 +92,10 @@ export default function AdminManagement() {
         <div className="bg-white dark:bg-safari-charcoal p-6 rounded-lg card-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Active</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">{admins.filter(a => a.status === 'active').length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Super Admins</p>
+              <p className="text-2xl font-bold text-purple-600 mt-1">{admins.filter(a => a.role === 'super-admin').length}</p>
             </div>
-            <UserCheck className="w-8 h-8 text-green-600" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-safari-charcoal p-6 rounded-lg card-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Suspended/Blocked</p>
-              <p className="text-2xl font-bold text-orange-600 mt-1">{admins.filter(a => a.status !== 'active').length}</p>
-            </div>
-            <UserX className="w-8 h-8 text-orange-600" />
+            <ShieldAlert className="w-8 h-8 text-purple-600" />
           </div>
         </div>
       </div>
@@ -119,9 +113,7 @@ export default function AdminManagement() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Admin</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Login</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
               </tr>
             </thead>
@@ -150,44 +142,20 @@ export default function AdminManagement() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(admin.status)}`}>
-                      {admin.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="w-3 h-3" />
-                      {admin.createdAt}
+                      {new Date(admin.created_at).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{admin.lastLogin}</td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      {admin.status === 'active' && admin.role !== 'super-admin' && (
-                        <>
-                          <button
-                            onClick={() => updateStatus(admin.id, 'suspended')}
-                            className="px-3 py-1 text-xs border border-orange-500 text-orange-500 rounded hover:bg-orange-500 hover:text-white transition-all"
-                          >
-                            Suspend
-                          </button>
-                          <button
-                            onClick={() => updateStatus(admin.id, 'blocked')}
-                            className="px-3 py-1 text-xs border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white transition-all"
-                          >
-                            Block
-                          </button>
-                        </>
-                      )}
-                      {admin.status !== 'active' && (
-                        <button
-                          onClick={() => updateStatus(admin.id, 'active')}
-                          className="px-3 py-1 text-xs border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-all"
-                        >
-                          Activate
-                        </button>
-                      )}
-                    </div>
+                    {admin.role !== 'super-admin' && (
+                      <button
+                        onClick={() => handleDelete(admin.id)}
+                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

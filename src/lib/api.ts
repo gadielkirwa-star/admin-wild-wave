@@ -15,6 +15,44 @@ export const setAuthToken = (token: string | null) => {
   }
 }
 
+export const uploadImage = async (file: File) => {
+  const imageBase64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+      reject(new Error('Failed to read image file'))
+    }
+    reader.onerror = () => reject(new Error('Failed to read image file'))
+    reader.readAsDataURL(file)
+  })
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  }
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`
+  }
+
+  const response = await fetch(`${API_URL}/admin/upload-image`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      imageBase64,
+      filename: file.name,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Image upload failed' }))
+    throw new Error(error.message || `HTTP ${response.status}`)
+  }
+
+  return response.json()
+}
+
 const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -224,6 +262,35 @@ export const deletePromotion = async (id: number) => {
 
 export const getActivePromotion = async () => {
   return fetchAPI('/public/promotions')
+}
+
+// Team Members
+export const getTeamMembers = async () => {
+  return fetchAPI('/admin/team-members')
+}
+
+export const createTeamMember = async (data: any) => {
+  return fetchAPI('/admin/team-members', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updateTeamMember = async (id: number, data: any) => {
+  return fetchAPI(`/admin/team-members/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const deleteTeamMember = async (id: number) => {
+  return fetchAPI(`/admin/team-members/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+export const getPublicTeamMembers = async () => {
+  return fetchAPI('/public/team-members')
 }
 
 // Admin Users

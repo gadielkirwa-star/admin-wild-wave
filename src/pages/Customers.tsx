@@ -1,8 +1,22 @@
-import { Search, Mail, Phone, MapPin, Calendar, TrendingUp, FileText } from 'lucide-react';
-import { db } from '../lib/db';
+import { Search, Mail, Phone, Calendar, TrendingUp, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import * as api from '../lib/api';
 
 export default function Customers() {
-  const customers = db.customers || [];
+  const [customers, setCustomers] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const loadCustomers = async () => {
+    try {
+      const data = await api.getCustomers();
+      setCustomers(data);
+    } catch (error) {
+      console.error('Failed to load customers:', error);
+    }
+  };
 
   const exportToPDF = () => {
     const printWindow = window.open('', '', 'width=800,height=600');
@@ -101,9 +115,6 @@ export default function Customers() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Location</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Bookings</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total Spent</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Joined</th>
               </tr>
             </thead>
@@ -126,24 +137,18 @@ export default function Customers() {
                         <Mail className="w-4 h-4 mr-2" />
                         {customer.email}
                       </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Phone className="w-4 h-4 mr-2" />
-                        {customer.phone}
-                      </div>
+                      {customer.phone && (
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <Phone className="w-4 h-4 mr-2" />
+                          {customer.phone}
+                        </div>
+                      )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {customer.country}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{customer.totalBookings}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-safari-gold">${customer.totalSpent.toLocaleString()}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {customer.joinedDate}
+                      {new Date(customer.created_at).toLocaleDateString()}
                     </div>
                   </td>
                 </tr>

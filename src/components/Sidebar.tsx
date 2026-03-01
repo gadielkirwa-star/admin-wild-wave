@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useStore } from '../store'
-import { LayoutDashboard, Package, MapPin, Users, DollarSign, Car, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy } from 'lucide-react'
+import { LayoutDashboard, Package, MapPin, DollarSign, Car, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
+
+const LOGO_URL = 'https://www.dropbox.com/scl/fi/hx1jqsxef1zz940ibzktk/wb.jpeg?rlkey=teccg3icp4p289k6q3g5w65w2&st=euyvj5ja&raw=1'
 
 const navigation = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -12,8 +14,8 @@ const navigation = [
   { name: 'Blog Posts', path: '/blog', icon: FileText },
   { name: 'Contact Info', path: '/contact-settings', icon: Phone },
   { name: 'Promotions', path: '/promotions', icon: Megaphone },
+  { name: 'Team', path: '/team', icon: Users },
   { name: 'Support', path: '/support', icon: LifeBuoy },
-  { name: 'Customers', path: '/customers', icon: Users },
   { name: 'Payments', path: '/payments', icon: DollarSign },
   { name: 'Guides & Vehicles', path: '/resources', icon: Car },
   { name: 'Admin Users', path: '/admins', icon: UserCog },
@@ -35,7 +37,7 @@ export default function Sidebar() {
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
               <img 
-                src="https://i.pinimg.com/736x/b7/4d/e4/b74de494b7a34e81af1cb59309b42b6f.jpg" 
+                src={LOGO_URL}
                 alt="WildWave Logo" 
                 className="w-10 h-10 rounded-lg object-cover"
               />
@@ -46,7 +48,7 @@ export default function Sidebar() {
           )}
           {sidebarCollapsed && (
             <img 
-              src="https://i.pinimg.com/736x/b7/4d/e4/b74de494b7a34e81af1cb59309b42b6f.jpg" 
+              src={LOGO_URL}
               alt="WildWave Logo" 
               className="w-10 h-10 rounded-lg object-cover mx-auto"
             />
