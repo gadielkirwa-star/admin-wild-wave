@@ -25,6 +25,9 @@ const TEAM_ROLE_OPTIONS = [
   'Conservation Liaison',
 ]
 
+const DEFAULT_TEAM_AVATAR =
+  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23e5dcc9'/%3E%3Ctext x='50%25' y='52%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-size='20' fill='%236b4e3d'%3ETeam%3C/text%3E%3C/svg%3E";
+
 const emptyForm = {
   name: '',
   role: '',
@@ -239,7 +242,7 @@ export default function Team() {
                 <>
                   <div className="flex items-center gap-4 mb-3">
                     <img
-                      src={member.image_url || 'https://via.placeholder.com/120?text=Team'}
+                      src={member.image_url || DEFAULT_TEAM_AVATAR}
                       alt={member.name}
                       className="w-16 h-16 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                     />
