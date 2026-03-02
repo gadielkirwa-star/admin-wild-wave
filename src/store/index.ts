@@ -32,7 +32,14 @@ export const useStore = create<AppState>((set) => ({
       return true
     } catch (error) {
       console.error('Login failed:', error)
-      return false
+      const message = error instanceof Error ? error.message : ''
+      if (
+        message.toLowerCase().includes('invalid credentials') ||
+        message.includes('401')
+      ) {
+        return false
+      }
+      throw error
     }
   },
   logout: () => {

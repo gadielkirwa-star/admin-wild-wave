@@ -1,8 +1,35 @@
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD
-    ? 'https://wildwave-safaris-api.onrender.com/api'
-    : 'http://localhost:5000/api')
+const PROD_API_FALLBACK = 'https://wildwave-safaris-api.onrender.com/api'
+const LOCAL_API_FALLBACK = 'http://localhost:5000/api'
+
+const isLocalHost = (hostname: string) =>
+  hostname === 'localhost' || hostname === '127.0.0.1'
+
+const resolveApiUrl = () => {
+  const raw = import.meta.env.VITE_API_URL?.trim()
+
+  if (!raw) {
+    return import.meta.env.PROD ? PROD_API_FALLBACK : LOCAL_API_FALLBACK
+  }
+
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : ''
+  const onLocalFrontend = currentHost ? isLocalHost(currentHost) : false
+
+  if (raw.startsWith(':')) {
+    return import.meta.env.PROD ? PROD_API_FALLBACK : LOCAL_API_FALLBACK
+  }
+
+  try {
+    const parsed = new URL(raw)
+    if (!onLocalFrontend && isLocalHost(parsed.hostname)) {
+      return PROD_API_FALLBACK
+    }
+    return parsed.toString().replace(/\/$/, '')
+  } catch {
+    return import.meta.env.PROD ? PROD_API_FALLBACK : LOCAL_API_FALLBACK
+  }
+}
+
+export const API_URL = resolveApiUrl()
 
 let authToken: string | null = localStorage.getItem('authToken')
 
@@ -63,10 +90,16 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
     headers['Authorization'] = `Bearer ${authToken}`
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers,
+    })
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'Network error'
+    throw new Error(`Cannot reach API at ${API_URL} (${reason})`)
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Request failed' }))

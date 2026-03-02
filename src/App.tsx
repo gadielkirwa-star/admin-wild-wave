@@ -28,7 +28,7 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/login" />} />
@@ -38,7 +38,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen bg-gray-50 dark:bg-safari-charcoal">
         <Sidebar />
         <Header />

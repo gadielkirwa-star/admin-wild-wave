@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { LogIn, Eye, EyeOff } from 'lucide-react'
+import { API_URL } from '../lib/api'
 
 const LOGO_URL = 'https://www.dropbox.com/scl/fi/hx1jqsxef1zz940ibzktk/wb.jpeg?rlkey=teccg3icp4p289k6q3g5w65w2&st=euyvj5ja&raw=1'
 
@@ -27,7 +28,8 @@ export default function Login() {
         setError('Invalid email or password')
       }
     } catch (err) {
-      setError('Login failed. Please try again.')
+      const reason = err instanceof Error ? err.message : 'Unknown network error'
+      setError(`Cannot reach backend API (${API_URL}). ${reason}`)
     } finally {
       setLoading(false)
     }
@@ -40,7 +42,7 @@ export default function Login() {
           <img 
             src={LOGO_URL}
             alt="WildWave Logo" 
-            className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 shadow-lg"
+            className="w-28 h-28 object-contain mx-auto mb-4 drop-shadow-lg"
           />
           <h1 className="text-4xl font-display font-bold text-safari-gold mb-2">WildWave Admin</h1>
           <p className="text-safari-cream/60">Sign in to manage your safari business</p>

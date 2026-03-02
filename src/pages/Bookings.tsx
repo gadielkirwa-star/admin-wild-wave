@@ -3,6 +3,38 @@ import { Search, Filter, Download, FileText } from 'lucide-react'
 import * as api from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 
+const getBookingStatusStyle = (status: string) => {
+  const value = String(status || '').toLowerCase()
+  if (value === 'pending' || value === 'new') {
+    return {
+      badge: 'bg-gradient-to-r from-sky-500 to-blue-600 text-white',
+      select: 'bg-gradient-to-r from-sky-500 to-blue-600 text-white border-sky-400',
+    }
+  }
+  if (value === 'confirmed' || value === 'in_progress' || value === 'in progress') {
+    return {
+      badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white',
+      select: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400',
+    }
+  }
+  if (value === 'completed' || value === 'resolved' || value === 'solved') {
+    return {
+      badge: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white',
+      select: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-400',
+    }
+  }
+  if (value === 'cancelled' || value === 'failed') {
+    return {
+      badge: 'bg-gradient-to-r from-rose-500 to-red-600 text-white',
+      select: 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-400',
+    }
+  }
+  return {
+    badge: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white',
+    select: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white border-slate-400',
+  }
+}
+
 export default function Bookings() {
   const [bookings, setBookings] = useState<any[]>([])
   const [search, setSearch] = useState('')
@@ -234,10 +266,17 @@ export default function Bookings() {
                   <td className="py-4 px-4 text-sm">{booking.start_date ? formatDate(booking.start_date) : 'TBD'}</td>
                   <td className="py-4 px-4 font-semibold text-sm">{formatCurrency(booking.total_price || 0)}</td>
                   <td className="py-4 px-4">
+                    <span className={`inline-block mb-2 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                      getBookingStatusStyle(booking.status).badge
+                    }`}>
+                      {booking.status}
+                    </span>
                     <select
                       value={booking.status}
                       onChange={(e) => handleStatusChange(booking.id, e.target.value)}
-                      className="px-3 py-1 rounded-lg border border-gray-200 dark:border-safari-brown/20 bg-white dark:bg-safari-brown/10 text-sm focus:outline-none focus:ring-2 focus:ring-safari-gold/50"
+                      className={`block px-3 py-1 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-safari-gold/50 shadow-sm ${
+                        getBookingStatusStyle(booking.status).select
+                      }`}
                     >
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>

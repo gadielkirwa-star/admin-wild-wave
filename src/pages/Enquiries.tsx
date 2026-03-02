@@ -3,6 +3,38 @@ import { Mail, Phone, User, Calendar, MessageSquare } from 'lucide-react'
 import * as api from '../lib/api'
 import { formatDate } from '../lib/utils'
 
+const getEnquiryStatusStyle = (status: string) => {
+  const value = String(status || '').toLowerCase()
+  if (value === 'new' || value === 'pending') {
+    return {
+      badge: 'bg-gradient-to-r from-sky-500 to-blue-600 text-white',
+      select: 'bg-gradient-to-r from-sky-500 to-blue-600 text-white border-sky-400',
+    }
+  }
+  if (value === 'contacted' || value === 'in_progress' || value === 'in progress') {
+    return {
+      badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white',
+      select: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400',
+    }
+  }
+  if (value === 'resolved' || value === 'solved' || value === 'completed') {
+    return {
+      badge: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white',
+      select: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-400',
+    }
+  }
+  if (value === 'cancelled' || value === 'closed') {
+    return {
+      badge: 'bg-gradient-to-r from-rose-500 to-red-600 text-white',
+      select: 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-400',
+    }
+  }
+  return {
+    badge: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white',
+    select: 'bg-gradient-to-r from-slate-500 to-gray-600 text-white border-slate-400',
+  }
+}
+
 export default function Enquiries() {
   const [enquiries, setEnquiries] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,10 +104,8 @@ export default function Enquiries() {
                     <div className="flex items-center gap-3 mb-2">
                       <User className="w-5 h-5 text-safari-gold" />
                       <h3 className="font-semibold text-lg">{enquiry.name}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        enquiry.status === 'new' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                        enquiry.status === 'contacted' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                        getEnquiryStatusStyle(enquiry.status).badge
                       }`}>
                         {enquiry.status}
                       </span>
@@ -111,7 +141,9 @@ export default function Enquiries() {
                   <select
                     value={enquiry.status}
                     onChange={(e) => handleStatusChange(enquiry.id, e.target.value)}
-                    className="ml-4 px-3 py-2 rounded-lg border border-gray-200 dark:border-safari-brown/20 bg-white dark:bg-safari-brown/10 text-sm focus:outline-none focus:ring-2 focus:ring-safari-gold/50"
+                    className={`ml-4 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-safari-gold/50 shadow-sm ${
+                      getEnquiryStatusStyle(enquiry.status).select
+                    }`}
                   >
                     <option value="new">New</option>
                     <option value="contacted">Contacted</option>
