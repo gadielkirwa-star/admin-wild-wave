@@ -41,10 +41,34 @@ export default function Team() {
   const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string>('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [form, setForm] = useState<any>(emptyForm)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+
+  const apiOrigin = api.API_URL.replace(/\/api\/?$/, '')
+  const toPreviewSrc = (value?: string | null) => {
+    const raw = String(value || '').trim()
+    if (!raw) return null
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) {
+      return raw
+    }
+    if (raw.startsWith('/')) {
+      return `${apiOrigin}${raw}`
+    }
+    return `${apiOrigin}/${raw}`
+  }
+  const isLocalUploadRef = (value?: string | null) => {
+    const raw = String(value || '').trim()
+    if (!raw) return false
+    if (raw.startsWith('/uploads/')) return true
+    try {
+      return new URL(raw).pathname.startsWith('/uploads/')
+    } catch {
+      return false
+    }
+  }
 
   useEffect(() => {
     loadMembers()
@@ -73,7 +97,7 @@ export default function Team() {
       const uploaded = await api.uploadImage(file)
       const imageUrl = uploaded?.url || uploaded?.path || ''
       setForm((prev: any) => ({ ...prev, image_url: imageUrl }))
-      setImagePreview(imageUrl || localPreview)
+      setImagePreview(toPreviewSrc(imageUrl) || localPreview)
     } catch (error) {
       console.error('Failed to upload image:', error)
       alert('Image upload failed. Please try again.')
@@ -83,8 +107,29 @@ export default function Team() {
     }
   }
 
+  const handleRemoveImage = async () => {
+    const currentImage = String(form.image_url || '').trim()
+    if (!currentImage) {
+      setImagePreview(null)
+      return
+    }
+
+    const shouldDelete = isLocalUploadRef(currentImage) && (!editingId || currentImage !== originalImageUrl)
+    if (shouldDelete) {
+      try {
+        await api.deleteUploadedImage(currentImage)
+      } catch (error) {
+        console.error('Failed to remove uploaded image:', error)
+      }
+    }
+
+    setForm((prev: any) => ({ ...prev, image_url: '' }))
+    setImagePreview(null)
+  }
+
   const startEdit = (member: TeamMember) => {
     setEditingId(member.id)
+    setOriginalImageUrl(member.image_url || '')
     setForm({
       name: member.name || '',
       role: member.role || '',
@@ -93,11 +138,20 @@ export default function Team() {
       active: member.active !== false,
       display_order: member.display_order ?? 0,
     })
-    setImagePreview(member.image_url || null)
+    setImagePreview(toPreviewSrc(member.image_url) || null)
   }
 
-  const cancelEdit = () => {
+  const cancelEdit = async () => {
+    const currentImage = String(form.image_url || '').trim()
+    if (currentImage && currentImage !== originalImageUrl && isLocalUploadRef(currentImage)) {
+      try {
+        await api.deleteUploadedImage(currentImage)
+      } catch (error) {
+        console.error('Failed to clean up temporary image:', error)
+      }
+    }
     setEditingId(null)
+    setOriginalImageUrl('')
     setForm(emptyForm)
     setImagePreview(null)
   }
@@ -109,6 +163,7 @@ export default function Team() {
       await loadMembers()
       setForm(emptyForm)
       setImagePreview(null)
+      setOriginalImageUrl('')
       setShowAddModal(false)
     } catch (error) {
       console.error('Failed to add team member:', error)
@@ -208,11 +263,19 @@ export default function Team() {
                     onChange={(e) => {
                       const value = e.target.value
                       setForm({ ...form, image_url: value })
-                      setImagePreview(value || null)
+                      setImagePreview(toPreviewSrc(value) || null)
                     }}
                     placeholder="Or paste image URL"
                     className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
                   />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="w-full px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-all disabled:opacity-50"
+                    disabled={!form.image_url}
+                  >
+                    Remove Image
+                  </button>
                   {imagePreview && <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-full object-cover border border-gray-200 dark:border-gray-700" />}
                   {uploading && <p className="text-xs text-safari-gold">Uploading image...</p>}
                   <div className="grid grid-cols-2 gap-3">
@@ -235,14 +298,14 @@ export default function Team() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleSave(member.id)} className="flex-1 px-4 py-2 safari-gradient text-white rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"><Save size={16} />Save</button>
-                    <button onClick={cancelEdit} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"><X size={16} /></button>
+                    <button onClick={() => void cancelEdit()} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"><X size={16} /></button>
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="flex items-center gap-4 mb-3">
                     <img
-                      src={member.image_url || DEFAULT_TEAM_AVATAR}
+                      src={toPreviewSrc(member.image_url) || DEFAULT_TEAM_AVATAR}
                       alt={member.name}
                       className="w-16 h-16 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                     />
@@ -287,11 +350,19 @@ export default function Team() {
                 onChange={(e) => {
                   const value = e.target.value
                   setForm({ ...form, image_url: value })
-                  setImagePreview(value || null)
+                  setImagePreview(toPreviewSrc(value) || null)
                 }}
                 placeholder="Or paste image URL"
                 className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
               />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="w-full px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-all disabled:opacity-50"
+                disabled={!form.image_url}
+              >
+                Remove Image
+              </button>
               {imagePreview && <img src={imagePreview} alt="Preview" className="w-20 h-20 rounded-full object-cover border border-gray-200 dark:border-gray-700" />}
               {uploading && <p className="text-xs text-safari-gold">Uploading image...</p>}
               <div className="grid grid-cols-2 gap-3">
@@ -305,8 +376,16 @@ export default function Team() {
             <div className="flex gap-3 mt-6">
               <button onClick={handleAdd} className="flex-1 px-4 py-2 safari-gradient text-white rounded-lg hover:opacity-90 transition-all">Add Team Member</button>
               <button
-                onClick={() => {
+                onClick={async () => {
+                  if (form.image_url && isLocalUploadRef(form.image_url)) {
+                    try {
+                      await api.deleteUploadedImage(form.image_url)
+                    } catch (error) {
+                      console.error('Failed to clean up temporary image:', error)
+                    }
+                  }
                   setShowAddModal(false)
+                  setOriginalImageUrl('')
                   setForm(emptyForm)
                   setImagePreview(null)
                 }}

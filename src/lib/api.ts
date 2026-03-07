@@ -80,6 +80,13 @@ export const uploadImage = async (file: File) => {
   return response.json()
 }
 
+export const deleteUploadedImage = async (imageUrl: string) => {
+  return fetchAPI('/admin/delete-image', {
+    method: 'POST',
+    body: JSON.stringify({ imageUrl }),
+  })
+}
+
 const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
