@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useStore } from '../store'
-import { LayoutDashboard, Package, MapPin, DollarSign, Car, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy, Users } from 'lucide-react'
+import { LayoutDashboard, Package, MapPin, DollarSign, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const LOGO_URL = 'https://www.dropbox.com/scl/fi/hx1jqsxef1zz940ibzktk/wb.jpeg?rlkey=teccg3icp4p289k6q3g5w65w2&st=euyvj5ja&raw=1'
@@ -17,7 +17,6 @@ const navigation = [
   { name: 'Team', path: '/team', icon: Users },
   { name: 'Support', path: '/support', icon: LifeBuoy },
   { name: 'Payments', path: '/payments', icon: DollarSign },
-  { name: 'Guides & Vehicles', path: '/resources', icon: Car },
   { name: 'Admin Users', path: '/admins', icon: UserCog },
   { name: 'Settings', path: '/settings', icon: Settings }
 ]

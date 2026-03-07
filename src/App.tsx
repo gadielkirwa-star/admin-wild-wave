@@ -7,7 +7,6 @@ import Bookings from './pages/Bookings'
 import Packages from './pages/Packages'
 import SafariPackages from './pages/SafariPackages'
 import Payments from './pages/Payments'
-import GuidesVehicles from './pages/GuidesVehicles'
 import AdminManagement from './pages/AdminManagement'
 import Settings from './pages/Settings'
 import Blog from './pages/Blog'
@@ -59,7 +58,6 @@ export default function App() {
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
-            <Route path="/resources" element={<ProtectedRoute><GuidesVehicles /></ProtectedRoute>} />
             <Route path="/admins" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
