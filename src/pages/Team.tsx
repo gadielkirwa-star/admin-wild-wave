@@ -52,6 +52,18 @@ export default function Team() {
     const raw = String(value || '').trim()
     if (!raw) return null
     if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) {
+      try {
+        const parsed = new URL(raw)
+        if (
+          parsed.protocol === 'http:' &&
+          (parsed.hostname.endsWith('.onrender.com') || window.location.protocol === 'https:')
+        ) {
+          parsed.protocol = 'https:'
+          return parsed.toString()
+        }
+      } catch {
+        // Fall back to raw URL if parsing fails.
+      }
       return raw
     }
     if (raw.startsWith('/')) {
