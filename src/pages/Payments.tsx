@@ -3,9 +3,10 @@ import { Search, DollarSign, CreditCard, CheckCircle, Clock, XCircle, Download, 
 import { useEffect, useMemo, useState } from 'react';
 import * as api from '../lib/api';
 import { formatCurrency, formatDate } from '../lib/utils';
+import type { Booking } from '../lib/types';
 
 export default function Payments() {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -18,8 +19,8 @@ export default function Payments() {
       const data = await api.getBookings();
       setBookings(data);
       setError('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to load payments');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load payments');
     } finally {
       setLoading(false);
     }

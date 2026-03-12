@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Mail, Phone, User, Calendar, MessageSquare } from 'lucide-react'
 import * as api from '../lib/api'
 import { formatDate } from '../lib/utils'
+import type { Enquiry } from '../lib/types'
 
 const getEnquiryStatusStyle = (status: string) => {
   const value = String(status || '').toLowerCase()
@@ -36,7 +37,7 @@ const getEnquiryStatusStyle = (status: string) => {
 }
 
 export default function Enquiries() {
-  const [enquiries, setEnquiries] = useState<any[]>([])
+  const [enquiries, setEnquiries] = useState<Enquiry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -50,9 +51,9 @@ export default function Enquiries() {
       console.log('Enquiries loaded:', data)
       setEnquiries(data)
       setError('')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load enquiries:', err)
-      setError(err.message || 'Failed to load enquiries')
+      setError(err instanceof Error ? err.message : 'Failed to load enquiries')
     } finally {
       setLoading(false)
     }

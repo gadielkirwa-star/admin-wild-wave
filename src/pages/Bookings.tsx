@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Filter, Download, FileText } from 'lucide-react'
 import * as api from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
+import type { Booking } from '../lib/types'
 
 const getBookingStatusStyle = (status: string) => {
   const value = String(status || '').toLowerCase()
@@ -36,7 +37,7 @@ const getBookingStatusStyle = (status: string) => {
 }
 
 export default function Bookings() {
-  const [bookings, setBookings] = useState<any[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -49,14 +50,10 @@ export default function Bookings() {
     try {
       setLoading(true)
       setError('')
-      const data = await api.getBookings() as any
-      const normalized = Array.isArray(data) ? data : (Array.isArray(data?.bookings) ? data.bookings : [])
-      setBookings(normalized)
-      if (!Array.isArray(data) && !Array.isArray(data?.bookings)) {
-        setError('Unexpected bookings response from API')
-      }
-    } catch (err: any) {
-      const message = err?.message || 'Failed to load bookings'
+      const data = await api.getBookings()
+      setBookings(Array.isArray(data) ? data : [])
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load bookings'
       console.error('Failed to load bookings:', err)
       setError(message)
       setBookings([])
@@ -77,15 +74,15 @@ export default function Bookings() {
   const exportToCSV = () => {
     const headers = ['Reference', 'Customer', 'Email', 'Package', 'People', 'Amount', 'Guide', 'Status', 'Date']
     const rows = bookings.map(b => [
-      b.ref,
-      b.customer,
+      `#${b.id}`,
+      b.customer_name,
       b.email,
-      b.package,
-      b.people,
-      b.amount,
-      b.guide,
+      b.safari_type || '',
+      b.number_of_people || 0,
+      b.total_price || 0,
+      '',
       b.status,
-      b.date
+      b.created_at
     ])
     
     const csvContent = [
@@ -142,13 +139,13 @@ export default function Bookings() {
           <tbody>
             ${bookings.map(b => `
               <tr>
-                <td>${b.ref}</td>
-                <td>${b.customer}</td>
-                <td>${b.package}</td>
-                <td>${b.people}</td>
-                <td>${formatCurrency(b.amount)}</td>
+                <td>#${b.id}</td>
+                <td>${b.customer_name}</td>
+                <td>${b.safari_type || ''}</td>
+                <td>${b.number_of_people || 0}</td>
+                <td>${formatCurrency(b.total_price || 0)}</td>
                 <td>${b.status}</td>
-                <td>${formatDate(b.date)}</td>
+                <td>${formatDate(b.created_at)}</td>
               </tr>
             `).join('')}
           </tbody>

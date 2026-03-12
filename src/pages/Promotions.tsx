@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Tag, Upload, Image as ImageIcon } from 'lucide-react'
 import * as api from '../lib/api'
+import type { Promotion, PromotionPayload } from '../lib/types'
 
 export default function Promotions() {
-  const [promotions, setPromotions] = useState<any[]>([])
-  const [editing, setEditing] = useState<any>(null)
+  const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [editing, setEditing] = useState<Promotion | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PromotionPayload>({
     title: '',
     description: '',
     info_text: '',
@@ -57,7 +58,7 @@ export default function Promotions() {
     }
   }
 
-  const handleEdit = (promo: any) => {
+  const handleEdit = (promo: Promotion) => {
     setEditing(promo)
     setFormData({
       title: promo.title,

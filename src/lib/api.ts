@@ -1,3 +1,22 @@
+import type {
+  AdminUser,
+  BlogPost,
+  Booking,
+  ContactSettings,
+  Customer,
+  DashboardStats,
+  Destination,
+  DestinationPayload,
+  Enquiry,
+  Promotion,
+  PromotionPayload,
+  SafariPackage,
+  SafariPackagePayload,
+  TeamMember,
+  TeamMemberPayload,
+  UploadResponse,
+} from './types'
+
 const PROD_API_FALLBACK = 'https://wildwave-safaris-api.onrender.com/api'
 const LOCAL_API_FALLBACK = 'http://localhost:5000/api'
 
@@ -42,7 +61,7 @@ export const setAuthToken = (token: string | null) => {
   }
 }
 
-export const uploadImage = async (file: File) => {
+export const uploadImage = async (file: File): Promise<UploadResponse> => {
   const imageBase64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
     reader.onloadend = () => {
@@ -87,7 +106,7 @@ export const deleteUploadedImage = async (imageUrl: string) => {
   })
 }
 
-const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
+const fetchAPI = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -127,16 +146,16 @@ export const login = async (email: string, password: string) => {
 }
 
 // Dashboard
-export const getDashboardStats = async () => {
+export const getDashboardStats = async (): Promise<DashboardStats> => {
   return fetchAPI('/admin/dashboard')
 }
 
 // Bookings
-export const getBookings = async () => {
+export const getBookings = async (): Promise<Booking[]> => {
   return fetchAPI('/admin/bookings')
 }
 
-export const updateBookingStatus = async (id: number, status: string) => {
+export const updateBookingStatus = async (id: number, status: string): Promise<Booking> => {
   return fetchAPI(`/admin/bookings/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ status }),
@@ -144,36 +163,36 @@ export const updateBookingStatus = async (id: number, status: string) => {
 }
 
 // Packages (Destinations)
-export const getPackages = async () => {
+export const getPackages = async (): Promise<Destination[]> => {
   return fetchAPI('/admin/destinations')
 }
 
-export const createPackage = async (data: any) => {
+export const createPackage = async (data: DestinationPayload): Promise<Destination> => {
   return fetchAPI('/admin/destinations', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const updatePackage = async (id: number, data: any) => {
+export const updatePackage = async (id: number, data: DestinationPayload): Promise<Destination> => {
   return fetchAPI(`/admin/destinations/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const deletePackage = async (id: number) => {
+export const deletePackage = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/destinations/${id}`, {
     method: 'DELETE',
   })
 }
 
 // Enquiries (Support)
-export const getEnquiries = async () => {
+export const getEnquiries = async (): Promise<Enquiry[]> => {
   return fetchAPI('/admin/enquiries')
 }
 
-export const updateEnquiryStatus = async (id: number, status: string) => {
+export const updateEnquiryStatus = async (id: number, status: string): Promise<Enquiry> => {
   return fetchAPI(`/admin/enquiries/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ status }),
@@ -181,89 +200,89 @@ export const updateEnquiryStatus = async (id: number, status: string) => {
 }
 
 // Public endpoints
-export const getPublicDestinations = async () => {
+export const getPublicDestinations = async (): Promise<Destination[]> => {
   return fetchAPI('/public/destinations')
 }
 
-export const submitBooking = async (data: any) => {
+export const submitBooking = async (data: unknown): Promise<Booking> => {
   return fetchAPI('/public/bookings', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const submitEnquiry = async (data: any) => {
+export const submitEnquiry = async (data: unknown): Promise<Enquiry> => {
   return fetchAPI('/public/enquiries', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const getPublicBlogs = async () => {
+export const getPublicBlogs = async (): Promise<BlogPost[]> => {
   return fetchAPI('/public/blogs')
 }
 
 // Blogs (Admin)
-export const getBlogs = async () => {
+export const getBlogs = async (): Promise<BlogPost[]> => {
   return fetchAPI('/admin/blogs')
 }
 
-export const createBlog = async (data: any) => {
+export const createBlog = async (data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>): Promise<BlogPost> => {
   return fetchAPI('/admin/blogs', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const updateBlog = async (id: number, data: any) => {
+export const updateBlog = async (id: number, data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>): Promise<BlogPost> => {
   return fetchAPI(`/admin/blogs/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const deleteBlog = async (id: number) => {
+export const deleteBlog = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/blogs/${id}`, {
     method: 'DELETE',
   })
 }
 
 // Contact Settings
-export const getContactSettings = async () => {
+export const getContactSettings = async (): Promise<ContactSettings> => {
   return fetchAPI('/admin/contact-settings')
 }
 
-export const updateContactSettings = async (data: any) => {
+export const updateContactSettings = async (data: ContactSettings): Promise<ContactSettings> => {
   return fetchAPI('/admin/contact-settings', {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const getPublicContactSettings = async () => {
+export const getPublicContactSettings = async (): Promise<ContactSettings> => {
   return fetchAPI('/public/contact-settings')
 }
 
 // Packages (Admin)
-export const getPackagesAdmin = async () => {
+export const getPackagesAdmin = async (): Promise<SafariPackage[]> => {
   return fetchAPI('/admin/packages')
 }
 
-export const createPackageAdmin = async (data: any) => {
+export const createPackageAdmin = async (data: SafariPackagePayload): Promise<SafariPackage> => {
   return fetchAPI('/admin/packages', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const updatePackageAdmin = async (id: number, data: any) => {
+export const updatePackageAdmin = async (id: number, data: SafariPackagePayload): Promise<SafariPackage> => {
   return fetchAPI(`/admin/packages/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const deletePackageAdmin = async (id: number) => {
+export const deletePackageAdmin = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/packages/${id}`, {
     method: 'DELETE',
   })
@@ -276,82 +295,82 @@ export const syncDestinationImagesFromPackages = async () => {
 }
 
 // Promotions
-export const getPromotions = async () => {
+export const getPromotions = async (): Promise<Promotion[]> => {
   return fetchAPI('/admin/promotions')
 }
 
-export const createPromotion = async (data: any) => {
+export const createPromotion = async (data: PromotionPayload): Promise<Promotion> => {
   return fetchAPI('/admin/promotions', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const updatePromotion = async (id: number, data: any) => {
+export const updatePromotion = async (id: number, data: PromotionPayload): Promise<Promotion> => {
   return fetchAPI(`/admin/promotions/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const deletePromotion = async (id: number) => {
+export const deletePromotion = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/promotions/${id}`, {
     method: 'DELETE',
   })
 }
 
-export const getActivePromotion = async () => {
+export const getActivePromotion = async (): Promise<Promotion[]> => {
   return fetchAPI('/public/promotions')
 }
 
 // Team Members
-export const getTeamMembers = async () => {
+export const getTeamMembers = async (): Promise<TeamMember[]> => {
   return fetchAPI('/admin/team-members')
 }
 
-export const createTeamMember = async (data: any) => {
+export const createTeamMember = async (data: TeamMemberPayload): Promise<TeamMember> => {
   return fetchAPI('/admin/team-members', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const updateTeamMember = async (id: number, data: any) => {
+export const updateTeamMember = async (id: number, data: TeamMemberPayload): Promise<TeamMember> => {
   return fetchAPI(`/admin/team-members/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
-export const deleteTeamMember = async (id: number) => {
+export const deleteTeamMember = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/team-members/${id}`, {
     method: 'DELETE',
   })
 }
 
-export const getPublicTeamMembers = async () => {
+export const getPublicTeamMembers = async (): Promise<TeamMember[]> => {
   return fetchAPI('/public/team-members')
 }
 
 // Admin Users
-export const getAdminUsers = async () => {
+export const getAdminUsers = async (): Promise<AdminUser[]> => {
   return fetchAPI('/admin/users')
 }
 
-export const createAdminUser = async (data: any) => {
+export const createAdminUser = async (data: Omit<AdminUser, 'id' | 'created_at'> & { password: string }): Promise<AdminUser> => {
   return fetchAPI('/admin/users', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export const deleteAdminUser = async (id: number) => {
+export const deleteAdminUser = async (id: number): Promise<{ message: string }> => {
   return fetchAPI(`/admin/users/${id}`, {
     method: 'DELETE',
   })
 }
 
 // Customers
-export const getCustomers = async () => {
+export const getCustomers = async (): Promise<Customer[]> => {
   return fetchAPI('/admin/customers')
 }

@@ -1,14 +1,15 @@
 import { Plus, Edit, Trash2, X, Save, Upload, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
+import type { SafariPackage, SafariPackagePayload } from '../lib/types'
 
 export default function SafariPackages() {
-  const [packages, setPackages] = useState<any[]>([])
+  const [packages, setPackages] = useState<SafariPackage[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [syncing, setSyncing] = useState(false)
-  const [editForm, setEditForm] = useState({ 
+  const [editForm, setEditForm] = useState<SafariPackagePayload>({ 
     name: '', 
     duration: '', 
     price: 0, 
@@ -50,7 +51,7 @@ export default function SafariPackages() {
     }
   }
 
-  const handleEdit = (pkg: any) => {
+  const handleEdit = (pkg: SafariPackage) => {
     setEditingId(pkg.id)
     setEditForm({ 
       name: pkg.name, 

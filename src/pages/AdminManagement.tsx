@@ -1,18 +1,11 @@
 import { motion } from 'framer-motion';
-import { Plus, Edit, Shield, ShieldAlert, UserX, UserCheck, Search, Mail, Calendar, Trash2 } from 'lucide-react';
+import { Plus, Shield, ShieldAlert, Search, Mail, Calendar, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import * as api from '../lib/api';
-
-interface Admin {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  created_at: string;
-}
+import type { AdminUser } from '../lib/types';
 
 export default function AdminManagement() {
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', role: 'sub-admin' });
 
@@ -55,7 +48,7 @@ export default function AdminManagement() {
   };
 
   const getRoleBadge = (role: string) => {
-    const styles: any = {
+    const styles: Record<string, string> = {
       'super-admin': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
       'admin': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
       'sub-admin': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
@@ -207,7 +200,7 @@ export default function AdminManagement() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
                 <select
                   value={newAdmin.role}
-                  onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value as any })}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700"
                 >
                   <option value="sub-admin">Sub Admin</option>

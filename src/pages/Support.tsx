@@ -2,10 +2,24 @@ import { motion } from 'framer-motion';
 import { Search, MessageSquare, Clock, CheckCircle, User, Mail, Phone, Send } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import * as api from '../lib/api';
+import type { Enquiry } from '../lib/types';
+
+type SupportTicket = {
+  id: number;
+  ticketId: string;
+  customer: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  status: string;
+  date: string;
+  replies: number;
+};
 
 export default function Support() {
-  const [enquiries, setEnquiries] = useState<any[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,14 +33,14 @@ export default function Support() {
       const data = await api.getEnquiries();
       setEnquiries(data);
       setError('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to load support tickets');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load support tickets');
     } finally {
       setLoading(false);
     }
   };
 
-  const supportTickets = useMemo(() => {
+  const supportTickets = useMemo<SupportTicket[]>(() => {
     return enquiries.map((item) => ({
       id: item.id,
       ticketId: `ENQ-${item.id}`,
@@ -49,6 +63,18 @@ export default function Support() {
     if (replyMessage.trim()) {
       alert(`Reply sent to ${selectedTicket.customer}`);
       setReplyMessage('');
+    }
+  };
+
+  const handleStatusChange = async (ticketId: number, status: string) => {
+    try {
+      await api.updateEnquiryStatus(ticketId, status);
+      await loadEnquiries();
+      setSelectedTicket((current) =>
+        current && current.id === ticketId ? { ...current, status } : current
+      );
+    } catch (error) {
+      console.error('Failed to update support ticket status:', error);
     }
   };
 
@@ -157,7 +183,11 @@ export default function Support() {
                     <h2 className="text-xl font-semibold text-safari-charcoal dark:text-safari-cream">{selectedTicket.subject}</h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTicket.ticketId}</p>
                   </div>
-                  <select className="px-3 py-1 border rounded-lg text-sm dark:bg-safari-charcoal dark:border-gray-700">
+                  <select
+                    value={selectedTicket.status}
+                    onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value)}
+                    className="px-3 py-1 border rounded-lg text-sm dark:bg-safari-charcoal dark:border-gray-700"
+                  >
                     <option value="new">New</option>
                     <option value="contacted">Contacted</option>
                     <option value="resolved">Resolved</option>

@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Save, X, Upload, Users } from 'lucide-react'
 import * as api from '../lib/api'
-
-type TeamMember = {
-  id: number
-  name: string
-  role?: string
-  bio?: string
-  image_url?: string
-  active?: boolean
-  display_order?: number
-}
+import type { TeamMember, TeamMemberPayload } from '../lib/types'
 
 const TEAM_ROLE_OPTIONS = [
   'Senior Safari Guide',
@@ -43,7 +34,7 @@ export default function Team() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [originalImageUrl, setOriginalImageUrl] = useState<string>('')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [form, setForm] = useState<any>(emptyForm)
+  const [form, setForm] = useState<TeamMemberPayload>(emptyForm)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -108,7 +99,7 @@ export default function Team() {
     try {
       const uploaded = await api.uploadImage(file)
       const imageUrl = uploaded?.url || uploaded?.path || ''
-      setForm((prev: any) => ({ ...prev, image_url: imageUrl }))
+      setForm((prev) => ({ ...prev, image_url: imageUrl }))
       setImagePreview(toPreviewSrc(imageUrl) || localPreview)
     } catch (error) {
       console.error('Failed to upload image:', error)
@@ -135,7 +126,7 @@ export default function Team() {
       }
     }
 
-    setForm((prev: any) => ({ ...prev, image_url: '' }))
+    setForm((prev) => ({ ...prev, image_url: '' }))
     setImagePreview(null)
   }
 

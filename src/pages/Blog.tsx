@@ -1,9 +1,10 @@
 import { Plus, Edit, Trash2, X, Save, Upload, Eye, EyeOff } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
+import type { BlogPost } from '../lib/types'
 
 export default function Blog() {
-  const [blogs, setBlogs] = useState<any[]>([])
+  const [blogs, setBlogs] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -55,7 +56,7 @@ export default function Blog() {
     }
   }
 
-  const handleEdit = (blog: any) => {
+  const handleEdit = (blog: BlogPost) => {
     setEditingId(blog.id)
     setEditForm({ 
       title: blog.title, 
@@ -112,7 +113,7 @@ export default function Blog() {
     }
   }
 
-  const togglePublished = async (blog: any) => {
+  const togglePublished = async (blog: BlogPost) => {
     try {
       await api.updateBlog(blog.id, { ...blog, published: !blog.published })
       await loadBlogs()

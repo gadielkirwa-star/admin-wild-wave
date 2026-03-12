@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import StatCard from '../components/StatCard'
 import { formatCurrency, formatDate } from '../lib/utils'
 import * as api from '../lib/api'
+import type { DashboardStats } from '../lib/types'
 
 const COLORS = ['#D4A574', '#C17855', '#6B7F5C', '#4A5D3F', '#6B4E3D']
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -20,8 +21,8 @@ export default function Dashboard() {
     try {
       const data = await api.getDashboardStats()
       setStats(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard')
     } finally {
       setLoading(false)
     }
@@ -120,7 +121,7 @@ export default function Dashboard() {
                 fill="#8884d8"
                 dataKey="bookings"
               >
-                {(stats.countryData || []).map((entry: any, index: number) => (
+                {(stats.countryData || []).map((entry, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -150,7 +151,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {(stats.recentBookings || []).map((booking: any) => (
+              {(stats.recentBookings || []).map((booking) => (
                 <tr key={booking.id} className="border-b border-gray-100 dark:border-safari-brown/10 hover:bg-gray-50 dark:hover:bg-safari-brown/10 transition-colors">
                   <td className="py-4 px-4 text-sm font-mono text-gray-900 dark:text-safari-cream">{booking.ref || booking.id}</td>
                   <td className="py-4 px-4">

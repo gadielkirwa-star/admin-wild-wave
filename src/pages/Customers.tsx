@@ -1,9 +1,10 @@
 import { Search, Mail, Phone, Calendar, TrendingUp, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import * as api from '../lib/api';
+import type { Customer } from '../lib/types';
 
 export default function Customers() {
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
     loadCustomers();
@@ -45,9 +46,6 @@ export default function Customers() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Country</th>
-              <th>Bookings</th>
-              <th>Total Spent</th>
               <th>Joined</th>
             </tr>
           </thead>
@@ -57,10 +55,7 @@ export default function Customers() {
                 <td>${c.name}</td>
                 <td>${c.email}</td>
                 <td>${c.phone}</td>
-                <td>${c.country}</td>
-                <td>${c.totalBookings}</td>
-                <td>$${c.totalSpent.toLocaleString()}</td>
-                <td>${c.joinedDate}</td>
+                <td>${new Date(c.created_at).toLocaleDateString()}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -124,7 +119,7 @@ export default function Customers() {
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full safari-gradient flex items-center justify-center text-white font-semibold">
-                        {customer.name.split(' ').map(n => n[0]).join('')}
+                        {customer.name.split(' ').map((n: string) => n[0]).join('')}
                       </div>
                       <div className="ml-3">
                         <p className="font-medium text-safari-charcoal dark:text-safari-cream">{customer.name}</p>

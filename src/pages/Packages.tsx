@@ -2,14 +2,15 @@ import { Plus, Edit, Trash2, X, Save, Upload, Image as ImageIcon } from 'lucide-
 import { formatCurrency } from '../lib/utils'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
+import type { Destination, DestinationPayload } from '../lib/types'
 
 export default function Packages() {
-  const [packages, setPackages] = useState<any[]>([])
+  const [packages, setPackages] = useState<Destination[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<string>('All')
-  const [editForm, setEditForm] = useState({ 
+  const [editForm, setEditForm] = useState<DestinationPayload>({ 
     name: '', 
     duration: '', 
     price: 0, 
@@ -61,7 +62,7 @@ export default function Packages() {
     }
   }
 
-  const handleEdit = (pkg: any) => {
+  const handleEdit = (pkg: Destination) => {
     setEditingId(pkg.id)
     setEditForm({ 
       name: pkg.name, 
@@ -130,7 +131,7 @@ export default function Packages() {
     Rwanda: packages.filter(p => p.category === 'Rwanda')
   }
 
-  const renderPackageCard = (pkg: any) => (
+  const renderPackageCard = (pkg: Destination) => (
     <div key={pkg.id} className="bg-white dark:bg-safari-charcoal rounded-2xl overflow-hidden card-shadow-lg border border-gray-100 dark:border-safari-brown/20 hover:shadow-xl transition-all">
       <div className="relative h-48 overflow-hidden group">
         <img src={editingId === pkg.id && imagePreview ? imagePreview : pkg.image_url} alt={pkg.name} className="w-full h-full object-cover" />
