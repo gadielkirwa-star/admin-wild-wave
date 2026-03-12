@@ -58,7 +58,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@wildwavesafaris.com"
+                placeholder="wildwavesafaris@gmail.com"
                 className="w-full px-4 py-3 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 focus:ring-2 focus:ring-safari-gold focus:border-transparent"
                 required
               />
