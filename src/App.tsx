@@ -1,3 +1,4 @@
+// Trigger admin dashboard deployment
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useStore } from './store'
 import Sidebar from './components/Sidebar'
