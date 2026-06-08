@@ -38,7 +38,7 @@ export default function Sidebar() {
               <img 
                 src={LOGO_URL}
                 alt="WildWave Logo" 
-                className="w-10 h-10 rounded-lg object-cover"
+                className="w-10 h-10 rounded-full object-cover object-left bg-white border-2 border-safari-gold/50 shadow-[0_0_10px_rgba(212,165,116,0.3)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,165,116,0.6)] hover:rotate-3"
               />
               <h1 className="text-2xl font-display font-bold text-safari-gold">
                 WildWave
@@ -49,7 +49,7 @@ export default function Sidebar() {
             <img 
               src={LOGO_URL}
               alt="WildWave Logo" 
-              className="w-10 h-10 rounded-lg object-cover mx-auto"
+              className="w-10 h-10 rounded-full object-cover object-left bg-white mx-auto border-2 border-safari-gold/50 shadow-[0_0_10px_rgba(212,165,116,0.3)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,165,116,0.6)] hover:-rotate-3"
             />
           )}
           <button

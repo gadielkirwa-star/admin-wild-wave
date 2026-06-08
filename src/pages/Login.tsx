@@ -42,7 +42,7 @@ export default function Login() {
           <img 
             src={LOGO_URL}
             alt="WildWave Logo" 
-            className="w-28 h-28 object-contain mx-auto mb-4 drop-shadow-lg"
+            className="w-28 h-28 object-cover object-left bg-white mx-auto mb-4 rounded-full border-4 border-safari-gold/30 shadow-[0_0_20px_rgba(212,165,116,0.4)] transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-[0_0_35px_rgba(212,165,116,0.7)] hover:rotate-3"
           />
           <h1 className="text-4xl font-display font-bold text-safari-gold mb-2">WildWave Admin</h1>
           <p className="text-safari-cream/60">Sign in to manage your safari business</p>
