@@ -17,7 +17,7 @@ import type {
   UploadResponse,
 } from './types'
 
-const PROD_API_FALLBACK = 'https://wildwave-safaris-api.onrender.com/api'
+const PROD_API_FALLBACK = 'https://wildwave-safari-api.onrender.com/api'
 const LOCAL_API_FALLBACK = 'http://localhost:5000/api'
 
 const isLocalHost = (hostname: string) =>
