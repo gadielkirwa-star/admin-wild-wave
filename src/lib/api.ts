@@ -8,6 +8,8 @@ import type {
   Destination,
   DestinationPayload,
   Enquiry,
+  Partner,
+  PartnerPayload,
   Promotion,
   PromotionPayload,
   SafariPackage,
@@ -373,4 +375,40 @@ export const deleteAdminUser = async (id: number): Promise<{ message: string }> 
 // Customers
 export const getCustomers = async (): Promise<Customer[]> => {
   return fetchAPI('/admin/customers')
+}
+
+// Partners (Admin)
+export const getPartners = async (): Promise<Partner[]> => {
+  return fetchAPI('/admin/partners')
+}
+
+export const createPartner = async (data: PartnerPayload): Promise<Partner> => {
+  return fetchAPI('/admin/partners', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updatePartner = async (id: number, data: PartnerPayload): Promise<Partner> => {
+  return fetchAPI(`/admin/partners/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export const togglePartner = async (id: number): Promise<Partner> => {
+  return fetchAPI(`/admin/partners/${id}/toggle`, {
+    method: 'PATCH',
+  })
+}
+
+export const deletePartner = async (id: number): Promise<{ message: string }> => {
+  return fetchAPI(`/admin/partners/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// Partners (Public)
+export const getPublicPartners = async (): Promise<Partner[]> => {
+  return fetchAPI('/public/partners')
 }

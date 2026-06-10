@@ -122,13 +122,13 @@ export default function Packages() {
   const countries = ['All', 'Kenya', 'Tanzania', 'Uganda', 'Rwanda']
   const filteredPackages = selectedCountry === 'All' 
     ? packages 
-    : packages.filter(pkg => pkg.category === selectedCountry)
+    : packages.filter(pkg => (pkg.country || pkg.category) === selectedCountry)
 
   const packagesByCountry = {
-    Kenya: packages.filter(p => p.category === 'Kenya'),
-    Tanzania: packages.filter(p => p.category === 'Tanzania'),
-    Uganda: packages.filter(p => p.category === 'Uganda'),
-    Rwanda: packages.filter(p => p.category === 'Rwanda')
+    Kenya: packages.filter(p => (p.country || p.category) === 'Kenya'),
+    Tanzania: packages.filter(p => (p.country || p.category) === 'Tanzania'),
+    Uganda: packages.filter(p => (p.country || p.category) === 'Uganda'),
+    Rwanda: packages.filter(p => (p.country || p.category) === 'Rwanda')
   }
 
   const renderPackageCard = (pkg: Destination) => (
@@ -137,7 +137,7 @@ export default function Packages() {
         <img src={editingId === pkg.id && imagePreview ? imagePreview : pkg.image_url} alt={pkg.name} className="w-full h-full object-cover" />
         <div className="absolute top-4 right-4">
           <span className="px-3 py-1 bg-safari-gold text-white text-xs font-bold rounded-full">
-            {editingId === pkg.id ? editForm.category : pkg.category}
+            {editingId === pkg.id ? (editForm.country || editForm.category) : (pkg.country || pkg.category || 'Destination')}
           </span>
         </div>
       </div>

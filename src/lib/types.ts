@@ -65,11 +65,33 @@ export interface DashboardStats {
   totalRevenue: number;
   totalCustomers: number;
   activeTours: number;
+  totalDestinations: number;
+  totalPackages: number;
+  totalBlogs: number;
+  totalPartners: number;
   bookingGrowth: number;
   revenueGrowth: number;
   recentBookings: Booking[];
+  recentBlogs: BlogPost[];
   countryData: DashboardCountryDatum[];
   revenueData: DashboardRevenueDatum[];
+}
+
+export interface Partner {
+  id: number;
+  name: string;
+  logo_url: string;
+  is_active: boolean;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PartnerPayload {
+  name: string;
+  logo_url: string;
+  is_active: boolean;
+  display_order: number;
 }
 
 export interface Destination {

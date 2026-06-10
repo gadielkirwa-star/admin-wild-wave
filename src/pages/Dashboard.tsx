@@ -1,5 +1,5 @@
-import { Package, DollarSign, Users, TrendingUp, Calendar } from 'lucide-react'
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { Package, DollarSign, Users, Calendar, MapPin, Briefcase, FileText, Handshake } from 'lucide-react'
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
 import StatCard from '../components/StatCard'
 import { formatCurrency, formatDate } from '../lib/utils'
@@ -57,33 +57,26 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Bookings"
-          value={stats.totalBookings || 0}
-          change={stats.bookingGrowth}
-          icon={Package}
-          color="bg-gradient-to-br from-safari-gold to-safari-terracotta"
-        />
-        <StatCard
-          title="Total Revenue"
-          value={formatCurrency(stats.totalRevenue || 0)}
-          change={stats.revenueGrowth}
-          icon={DollarSign}
-          color="bg-gradient-to-br from-green-500 to-emerald-600"
-        />
-        <StatCard
-          title="Active Tours"
-          value={stats.activeTours || 0}
-          icon={Calendar}
-          color="bg-gradient-to-br from-blue-500 to-indigo-600"
-        />
-        <StatCard
-          title="Total Customers"
-          value={stats.totalCustomers || 0}
-          icon={Users}
-          color="bg-gradient-to-br from-purple-500 to-pink-600"
-        />
+      {/* Business Stats */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 dark:text-safari-cream/50 uppercase tracking-wider mb-4">Business Performance</h2>
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Total Bookings" value={stats.totalBookings || 0} change={stats.bookingGrowth} icon={Package} color="bg-gradient-to-br from-safari-gold to-safari-terracotta" />
+          <StatCard title="Total Revenue" value={formatCurrency(stats.totalRevenue || 0)} change={stats.revenueGrowth} icon={DollarSign} color="bg-gradient-to-br from-green-500 to-emerald-600" />
+          <StatCard title="Active Tours" value={stats.activeTours || 0} icon={Calendar} color="bg-gradient-to-br from-blue-500 to-indigo-600" />
+          <StatCard title="Total Customers" value={stats.totalCustomers || 0} icon={Users} color="bg-gradient-to-br from-purple-500 to-pink-600" />
+        </div>
+      </div>
+
+      {/* Content Stats */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 dark:text-safari-cream/50 uppercase tracking-wider mb-4">Content Overview</h2>
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Destinations" value={stats.totalDestinations || 0} icon={MapPin} color="bg-gradient-to-br from-amber-500 to-orange-600" />
+          <StatCard title="Safari Packages" value={stats.totalPackages || 0} icon={Briefcase} color="bg-gradient-to-br from-teal-500 to-cyan-600" />
+          <StatCard title="Blog Posts" value={stats.totalBlogs || 0} icon={FileText} color="bg-gradient-to-br from-rose-500 to-pink-600" />
+          <StatCard title="Partners" value={stats.totalPartners || 0} icon={Handshake} color="bg-gradient-to-br from-violet-500 to-purple-600" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -121,7 +114,7 @@ export default function Dashboard() {
                 fill="#8884d8"
                 dataKey="bookings"
               >
-                {(stats.countryData || []).map((entry, index: number) => (
+                {(stats.countryData || []).map((_entry, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

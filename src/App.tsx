@@ -17,6 +17,7 @@ import Promotions from './pages/Promotions'
 import Support from './pages/Support'
 import Team from './pages/Team'
 import Login from './pages/Login'
+import Partners from './pages/Partners'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStore((state) => state.isAuthenticated)
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+            <Route path="/partners" element={<ProtectedRoute><Partners /></ProtectedRoute>} />
             <Route path="/admins" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
