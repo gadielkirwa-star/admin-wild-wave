@@ -301,6 +301,55 @@ export default function Enquiries() {
 
   const unreadCount = filtered.filter((e) => !readSet.has(e.id)).length
 
+  // Stats counts (always from full enquiries list, not filtered)
+  const stats = [
+    {
+      label: 'New',
+      count: enquiries.filter((e) => ['new','pending'].includes(e.status.toLowerCase())).length,
+      icon: <MessageSquare size={22} />,
+      color: 'text-sky-600',
+      bg: 'bg-sky-50 dark:bg-sky-900/20',
+      border: 'border-sky-200 dark:border-sky-800/40',
+      dot: unreadCount > 0,
+    },
+    {
+      label: 'Contacted',
+      count: enquiries.filter((e) => ['contacted','in_progress'].includes(e.status.toLowerCase())).length,
+      icon: <Phone size={22} />,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50 dark:bg-amber-900/20',
+      border: 'border-amber-200 dark:border-amber-800/40',
+      dot: false,
+    },
+    {
+      label: 'Resolved',
+      count: enquiries.filter((e) => ['resolved','solved','completed'].includes(e.status.toLowerCase())).length,
+      icon: <CheckCircle2 size={22} />,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+      border: 'border-emerald-200 dark:border-emerald-800/40',
+      dot: false,
+    },
+    {
+      label: 'Closed',
+      count: enquiries.filter((e) => ['cancelled','closed'].includes(e.status.toLowerCase())).length,
+      icon: <XCircle size={22} />,
+      color: 'text-rose-600',
+      bg: 'bg-rose-50 dark:bg-rose-900/20',
+      border: 'border-rose-200 dark:border-rose-800/40',
+      dot: false,
+    },
+    {
+      label: 'Total',
+      count: enquiries.length,
+      icon: <Mail size={22} />,
+      color: 'text-safari-gold',
+      bg: 'bg-amber-50/50 dark:bg-safari-brown/20',
+      border: 'border-amber-100 dark:border-safari-brown/30',
+      dot: false,
+    },
+  ]
+
   return (
     <>
       <style>{`
@@ -320,11 +369,30 @@ export default function Enquiries() {
           <p className="text-gray-600 dark:text-safari-cream/60 mt-1">
             Manage customer inquiries and messages
             {unreadCount > 0 && (
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500 text-white">
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500 text-white animate-pulse">
                 {unreadCount} new
               </span>
             )}
           </p>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className={`relative flex items-center justify-between p-4 rounded-xl border ${s.bg} ${s.border} transition-shadow hover:shadow-md`}
+            >
+              {s.dot && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping" />
+              )}
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-white/50 mb-1">{s.label}</p>
+                <p className={`text-2xl font-bold ${s.color}`}>{s.count}</p>
+              </div>
+              <span className={s.color}>{s.icon}</span>
+            </div>
+          ))}
         </div>
 
         <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 card-shadow-lg border border-gray-100 dark:border-safari-brown/20">

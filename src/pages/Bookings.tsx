@@ -334,6 +334,55 @@ export default function Bookings() {
 
   const unreadCount = filteredBookings.filter((b) => !readSet.has(b.id)).length
 
+  // Stats counts (from full bookings list, not filtered)
+  const stats = [
+    {
+      label: 'New / Pending',
+      count: bookings.filter((b) => ['pending','new'].includes(b.status.toLowerCase())).length,
+      icon: <Clock size={22} />,
+      color: 'text-sky-600',
+      bg: 'bg-sky-50 dark:bg-sky-900/20',
+      border: 'border-sky-200 dark:border-sky-800/40',
+      dot: unreadCount > 0,
+    },
+    {
+      label: 'Confirmed',
+      count: bookings.filter((b) => ['confirmed','in_progress'].includes(b.status.toLowerCase())).length,
+      icon: <CheckCircle2 size={22} />,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50 dark:bg-amber-900/20',
+      border: 'border-amber-200 dark:border-amber-800/40',
+      dot: false,
+    },
+    {
+      label: 'Completed',
+      count: bookings.filter((b) => b.status.toLowerCase() === 'completed').length,
+      icon: <CheckCircle2 size={22} />,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+      border: 'border-emerald-200 dark:border-emerald-800/40',
+      dot: false,
+    },
+    {
+      label: 'Cancelled',
+      count: bookings.filter((b) => ['cancelled','failed'].includes(b.status.toLowerCase())).length,
+      icon: <XCircle size={22} />,
+      color: 'text-rose-600',
+      bg: 'bg-rose-50 dark:bg-rose-900/20',
+      border: 'border-rose-200 dark:border-rose-800/40',
+      dot: false,
+    },
+    {
+      label: 'Total',
+      count: bookings.length,
+      icon: <Package size={22} />,
+      color: 'text-safari-gold',
+      bg: 'bg-amber-50/50 dark:bg-safari-brown/20',
+      border: 'border-amber-100 dark:border-safari-brown/30',
+      dot: false,
+    },
+  ]
+
   return (
     <>
       <style>{`
@@ -354,7 +403,7 @@ export default function Bookings() {
             <p className="text-gray-600 dark:text-safari-cream/60 mt-1">
               Manage all safari bookings and reservations
               {unreadCount > 0 && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500 text-white">
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500 text-white animate-pulse">
                   {unreadCount} new
                 </span>
               )}
@@ -374,6 +423,25 @@ export default function Bookings() {
               <FileText size={18} /> Export PDF
             </button>
           </div>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className={`relative flex items-center justify-between p-4 rounded-xl border ${s.bg} ${s.border} transition-shadow hover:shadow-md`}
+            >
+              {s.dot && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-sky-500 animate-ping" />
+              )}
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-white/50 mb-1">{s.label}</p>
+                <p className={`text-2xl font-bold ${s.color}`}>{s.count}</p>
+              </div>
+              <span className={s.color}>{s.icon}</span>
+            </div>
+          ))}
         </div>
 
         <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 card-shadow-lg border border-gray-100 dark:border-safari-brown/20">
