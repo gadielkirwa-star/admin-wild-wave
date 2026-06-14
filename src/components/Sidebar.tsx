@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useStore } from '../store'
-import { LayoutDashboard, Package, MapPin, DollarSign, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy, Users, Handshake } from 'lucide-react'
+import { LayoutDashboard, Package, MapPin, DollarSign, Settings, UserCog, Menu, X, FileText, Phone, Briefcase, Mail, Megaphone, LifeBuoy, Users, Handshake, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const LOGO_URL = 'https://www.dropbox.com/scl/fi/hx1jqsxef1zz940ibzktk/wb.jpeg?rlkey=teccg3icp4p289k6q3g5w65w2&st=euyvj5ja&raw=1'
@@ -24,7 +24,18 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation()
-  const { sidebarCollapsed, toggleSidebar } = useStore()
+  const { sidebarCollapsed, toggleSidebar, user, logout } = useStore()
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      logout()
+      window.location.href = '/login'
+    }
+  }
+
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    : 'A'
 
   return (
     <motion.aside
@@ -36,9 +47,9 @@ export default function Sidebar() {
         <div className="flex items-center justify-between p-6 border-b border-safari-brown/20">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
-              <img 
+              <img
                 src={LOGO_URL}
-                alt="WildWave Logo" 
+                alt="WildWave Logo"
                 className="w-10 h-10 rounded-full object-cover object-left bg-white border-2 border-safari-gold/50 shadow-[0_0_10px_rgba(212,165,116,0.3)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,165,116,0.6)] hover:rotate-3"
               />
               <h1 className="text-2xl font-display font-bold text-safari-gold">
@@ -47,9 +58,9 @@ export default function Sidebar() {
             </div>
           )}
           {sidebarCollapsed && (
-            <img 
+            <img
               src={LOGO_URL}
-              alt="WildWave Logo" 
+              alt="WildWave Logo"
               className="w-10 h-10 rounded-full object-cover object-left bg-white mx-auto border-2 border-safari-gold/50 shadow-[0_0_10px_rgba(212,165,116,0.3)] transition-all duration-300 hover:scale-110 hover:shadow-[0_0_15px_rgba(212,165,116,0.6)] hover:-rotate-3"
             />
           )}
@@ -61,7 +72,7 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navigation.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
@@ -85,30 +96,39 @@ export default function Sidebar() {
           })}
         </nav>
 
+        {/* ── Bottom user card ── */}
         <div className="p-4 border-t border-safari-brown/20">
           <div className={cn(
             'flex items-center gap-3 p-3 rounded-xl bg-safari-brown/20',
-            sidebarCollapsed && 'justify-center'
+            sidebarCollapsed ? 'flex-col gap-2' : ''
           )}>
-            <div className="w-10 h-10 rounded-full safari-gradient flex items-center justify-center text-white font-bold">
-              A
+            {/* Avatar */}
+            <div className="w-9 h-9 rounded-full safari-gradient flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {initials}
             </div>
+
+            {/* Name + logout text — only when expanded */}
             {!sidebarCollapsed && (
-              <div className="flex-1">
-                <p className="text-sm font-medium text-safari-cream">Admin User</p>
-                <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to logout?')) {
-                      useStore.getState().logout()
-                      window.location.href = '/login'
-                    }
-                  }}
-                  className="text-xs text-safari-cream/60 hover:text-safari-gold transition-colors"
-                >
-                  Logout
-                </button>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-safari-cream truncate">
+                  {user?.name || 'Admin User'}
+                </p>
+                <p className="text-xs text-safari-cream/40 truncate">
+                  {user?.email || ''}
+                </p>
               </div>
             )}
+
+            {/* Logout icon — always visible */}
+            <button
+              onClick={handleLogout}
+              title="Log out"
+              className={cn(
+                'flex-shrink-0 p-1.5 rounded-lg text-safari-cream/50 hover:text-red-400 hover:bg-red-900/20 transition-colors',
+              )}
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </div>
