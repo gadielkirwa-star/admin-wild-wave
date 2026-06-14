@@ -10,6 +10,9 @@ interface AppState {
   toggleSidebar: () => void
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
+  unreadBookingsCount: number
+  unreadEnquiriesCount: number
+  pollNotifications: () => Promise<void>
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -45,6 +48,27 @@ export const useStore = create<AppState>((set) => ({
   logout: () => {
     api.setAuthToken(null)
     localStorage.removeItem('user')
-    set({ isAuthenticated: false, user: null })
+    set({ isAuthenticated: false, user: null, unreadBookingsCount: 0, unreadEnquiriesCount: 0 })
+  },
+  unreadBookingsCount: 0,
+  unreadEnquiriesCount: 0,
+  pollNotifications: async () => {
+    if (localStorage.getItem('authToken') === null) return
+    try {
+      const [bookings, enquiries] = await Promise.all([
+        api.getBookings(),
+        api.getEnquiries()
+      ])
+      
+      const readBookings = new Set(JSON.parse(localStorage.getItem('ww_read_bookings') || '[]'))
+      const readEnquiries = new Set(JSON.parse(localStorage.getItem('ww_read_enquiries') || '[]'))
+
+      const unreadB = bookings.filter((b: any) => !readBookings.has(b.id)).length
+      const unreadE = enquiries.filter((e: any) => !readEnquiries.has(e.id)).length
+
+      set({ unreadBookingsCount: unreadB, unreadEnquiriesCount: unreadE })
+    } catch (err) {
+      // fail silently on background poll
+    }
   }
 }))

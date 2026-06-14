@@ -1,4 +1,4 @@
-// Trigger admin dashboard deployment
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useStore } from './store'
 import Sidebar from './components/Sidebar'
@@ -25,7 +25,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { sidebarCollapsed, isAuthenticated } = useStore()
+  const { sidebarCollapsed, isAuthenticated, pollNotifications } = useStore()
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    pollNotifications() // initial poll
+    const interval = setInterval(pollNotifications, 30000) // poll every 30s
+    return () => clearInterval(interval)
+  }, [isAuthenticated, pollNotifications])
+
 
   if (!isAuthenticated) {
     return (

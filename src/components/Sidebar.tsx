@@ -24,7 +24,7 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation()
-  const { sidebarCollapsed, toggleSidebar, user, logout } = useStore()
+  const { sidebarCollapsed, toggleSidebar, user, logout, unreadBookingsCount, unreadEnquiriesCount } = useStore()
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to log out?')) {
@@ -76,20 +76,39 @@ export default function Sidebar() {
           {navigation.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
+            
+            let badgeCount = 0
+            if (item.name === 'Bookings') badgeCount = unreadBookingsCount
+            if (item.name === 'Enquiries' || item.name === 'Support') badgeCount = unreadEnquiriesCount
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative group',
                   isActive
                     ? 'safari-gradient text-white shadow-lg'
                     : 'text-safari-cream/70 hover:bg-safari-brown/20 hover:text-safari-cream'
                 )}
               >
-                <Icon size={20} />
+                <div className="relative flex-shrink-0">
+                  <Icon size={20} />
+                  {/* Dot for collapsed sidebar */}
+                  {sidebarCollapsed && badgeCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-500 rounded-full border-2 border-safari-charcoal animate-pulse" />
+                  )}
+                </div>
+
                 {!sidebarCollapsed && (
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium flex-1 truncate">{item.name}</span>
+                )}
+                
+                {/* Badge for expanded sidebar */}
+                {!sidebarCollapsed && badgeCount > 0 && (
+                  <span className="flex-shrink-0 bg-sky-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    {badgeCount}
+                  </span>
                 )}
               </Link>
             )
