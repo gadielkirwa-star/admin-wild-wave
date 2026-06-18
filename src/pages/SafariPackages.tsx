@@ -1,4 +1,4 @@
-import { Plus, Edit, Trash2, X, Save, Upload, RefreshCw } from 'lucide-react'
+import { Plus, Edit, Trash2, X, Save, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
 import type { SafariPackage, SafariPackagePayload } from '../lib/types'
@@ -6,7 +6,7 @@ import type { SafariPackage, SafariPackagePayload } from '../lib/types'
 export default function SafariPackages() {
   const [packages, setPackages] = useState<SafariPackage[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [editForm, setEditForm] = useState<SafariPackagePayload>({ 
@@ -55,11 +55,11 @@ export default function SafariPackages() {
     setEditingId(pkg.id)
     setEditForm({ 
       name: pkg.name, 
-      duration: pkg.duration, 
-      price: pkg.price, 
+      duration: pkg.duration || '', 
+      price: pkg.price || 0, 
       tag: pkg.tag || '',
       type: pkg.type || '',
-      image_url: pkg.image_url,
+      image_url: pkg.image_url || '',
       description: pkg.description || '',
       itinerary: pkg.itinerary || '',
       includes: pkg.includes || '',
@@ -68,7 +68,7 @@ export default function SafariPackages() {
     })
   }
 
-  const handleSave = async (id: string) => {
+  const handleSave = async (id: number) => {
     try {
       await api.updatePackageAdmin(id, editForm)
       await loadPackages()
@@ -78,7 +78,7 @@ export default function SafariPackages() {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this package?')) {
       try {
         await api.deletePackageAdmin(id)
@@ -92,7 +92,7 @@ export default function SafariPackages() {
   const handleSyncDestinationImages = async () => {
     setSyncing(true)
     try {
-      const result = await api.syncDestinationImagesFromPackages()
+      const result = (await api.syncDestinationImagesFromPackages()) as { sourceCount: number, updatedCount: number, unmatchedCount: number }
       alert(
         `Sync complete.\n` +
         `Packages checked: ${result.sourceCount}\n` +
@@ -142,7 +142,7 @@ export default function SafariPackages() {
           <div key={pkg.id} className="bg-white dark:bg-safari-charcoal rounded-2xl overflow-hidden card-shadow-lg border border-gray-100 dark:border-safari-brown/20 flex flex-col md:flex-row">
             {!editingId || editingId !== pkg.id ? (
               <div className="md:w-1/3 h-48 md:h-auto">
-                <img src={pkg.image_url} alt={pkg.name} className="w-full h-full object-cover" />
+                <img src={pkg.image_url || undefined} alt={pkg.name} className="w-full h-full object-cover" />
               </div>
             ) : null}
             <div className="p-6 flex-1">
