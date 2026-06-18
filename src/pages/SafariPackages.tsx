@@ -25,7 +25,8 @@ export default function SafariPackages() {
     accommodations_budget: '',
     accommodations_midrange: '',
     accommodations_luxury: '',
-    addons: ''
+    addons: '',
+    country: ''
   })
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function SafariPackages() {
       try {
         await api.createPackageAdmin(editForm)
         await loadPackages()
-        setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '' })
+        setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '', country: '' })
         setShowAddModal(false)
       } catch (error) {
         console.error('Failed to add package:', error)
@@ -74,7 +75,8 @@ export default function SafariPackages() {
       accommodations_budget: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[0] || '' : '',
       accommodations_midrange: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[1] || '' : '',
       accommodations_luxury: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[2] || '' : '',
-      addons: pkg.addons && Array.isArray(pkg.addons) ? pkg.addons.join('|') : ''
+      addons: pkg.addons && Array.isArray(pkg.addons) ? pkg.addons.join('|') : '',
+      country: pkg.country || ''
     })
   }
 
@@ -170,6 +172,16 @@ export default function SafariPackages() {
                       <option value="Balloon Safaris">Balloon Safaris</option>
                       <option value="Beach Add-Ons">Beach Add-Ons</option>
                     </select>
+                    <select value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
+                      <option value="">Select Country/Flag</option>
+                      <option value="Kenya">Kenya 🇰🇪</option>
+                      <option value="Tanzania">Tanzania 🇹🇿</option>
+                      <option value="Uganda">Uganda 🇺🇬</option>
+                      <option value="Rwanda">Rwanda 🇷🇼</option>
+                      <option value="Burundi">Burundi 🇧🇮</option>
+                      <option value="South Sudan">South Sudan 🇸🇸</option>
+                      <option value="DR Congo">DR Congo 🇨🇩</option>
+                    </select>
                     <input type="url" value={editForm.image_url} onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })} placeholder="Image URL" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                   </div>
                   <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
@@ -211,7 +223,7 @@ export default function SafariPackages() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-safari-cream">{pkg.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-safari-cream/60">{pkg.duration} • ${pkg.price} • {pkg.type}</p>
+                      <p className="text-sm text-gray-600 dark:text-safari-cream/60">{pkg.duration} • ${pkg.price} • {pkg.type}{pkg.country && ` • ${pkg.country}`}</p>
                       {pkg.tag && <span className="inline-block mt-2 px-2 py-1 bg-safari-gold text-white text-xs rounded-full">{pkg.tag}</span>}
                     </div>
                     <div className="flex gap-2">
@@ -244,6 +256,16 @@ export default function SafariPackages() {
                   <option value="Gorilla Trekking">Gorilla Trekking</option>
                   <option value="Balloon Safaris">Balloon Safaris</option>
                   <option value="Beach Add-Ons">Beach Add-Ons</option>
+                </select>
+                <select value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
+                  <option value="">Select Country/Flag</option>
+                  <option value="Kenya">Kenya 🇰🇪</option>
+                  <option value="Tanzania">Tanzania 🇹🇿</option>
+                  <option value="Uganda">Uganda 🇺🇬</option>
+                  <option value="Rwanda">Rwanda 🇷🇼</option>
+                  <option value="Burundi">Burundi 🇧🇮</option>
+                  <option value="South Sudan">South Sudan 🇸🇸</option>
+                  <option value="DR Congo">DR Congo 🇨🇩</option>
                 </select>
                 <input type="url" value={editForm.image_url} onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })} placeholder="Image URL" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               </div>

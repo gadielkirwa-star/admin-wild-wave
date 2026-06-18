@@ -173,6 +173,7 @@ export interface SafariPackage {
   highlights?: string[] | null;
   accommodations?: string[] | null;
   addons?: string[] | null;
+  country?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -194,6 +195,7 @@ export interface SafariPackagePayload {
   accommodations_midrange: string;
   accommodations_luxury: string;
   addons: string;
+  country: string;
 }
 
 export interface TeamMember {
