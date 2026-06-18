@@ -190,8 +190,6 @@ export default function SafariPackages() {
                   <textarea value={editForm.excludes} onChange={(e) => setEditForm({ ...editForm, excludes: e.target.value })} placeholder="Excludes (separate with |)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                   
                   <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700 space-y-4">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-safari-cream">Detailed Card Components (Visible on Main Site)</h4>
-                    
                     <textarea value={editForm.highlights} onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })} placeholder="Highlights (separate with | e.g. Spot Lions | Photographic Safari)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                     
                     <div className="grid grid-cols-3 gap-2">
@@ -210,7 +208,6 @@ export default function SafariPackages() {
                     </div>
 
                     <textarea value={editForm.addons} onChange={(e) => setEditForm({ ...editForm, addons: e.target.value })} placeholder="Premium Add-Ons (separate with | e.g. Zanzibar Extension | Hot Air Balloon)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
-                    <p className="text-[11px] text-safari-gold">Note: These components are mapped to the specific safari type and displayed in the package detail card on the main site.</p>
                   </div>
                   
                   <div className="flex gap-2">
@@ -275,8 +272,6 @@ export default function SafariPackages() {
               <textarea value={editForm.excludes} onChange={(e) => setEditForm({ ...editForm, excludes: e.target.value })} placeholder="Excludes (separate with | e.g., Flights|Insurance|Tips)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               
               <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700 space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-safari-cream">Detailed Card Components (Visible on Main Site)</h4>
-                
                 <textarea value={editForm.highlights} onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })} placeholder="Highlights (separate with | e.g., Panoramic views | Professional photography guide)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                 
                 <div className="grid grid-cols-3 gap-2">
@@ -295,7 +290,6 @@ export default function SafariPackages() {
                 </div>
 
                 <textarea value={editForm.addons} onChange={(e) => setEditForm({ ...editForm, addons: e.target.value })} placeholder="Premium Add-Ons (separate with | e.g. Zanzibar Extension | Hot Air Balloon)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
-                <p className="text-[11px] text-safari-gold">Note: These components are mapped to the specific safari type and displayed in the package detail card on the main site.</p>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
