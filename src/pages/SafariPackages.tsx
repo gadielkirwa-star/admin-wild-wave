@@ -358,10 +358,10 @@ export default function SafariPackages() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 max-w-2xl w-full card-shadow-lg my-8">
-            <h2 className="text-2xl font-bold text-safari-charcoal dark:text-safari-cream mb-4">Add New Safari Package</h2>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-safari-charcoal rounded-2xl p-6 max-w-2xl w-full card-shadow-lg my-8 flex flex-col max-h-[90vh]">
+            <h2 className="text-2xl font-bold text-safari-charcoal dark:text-safari-cream mb-4 shrink-0">Add New Safari Package</h2>
+            <div className="space-y-4 overflow-y-auto pr-2 flex-1">
               <div className="grid grid-cols-2 gap-4">
                 <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} placeholder="Package name" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                 <input type="text" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} placeholder="Duration (e.g., 7 Days)" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
@@ -430,7 +430,7 @@ export default function SafariPackages() {
                 <textarea value={editForm.addons} onChange={(e) => setEditForm({ ...editForm, addons: e.target.value })} placeholder="Premium Add-Ons (separate with | e.g. Zanzibar Extension | Hot Air Balloon)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-6 shrink-0">
               <button onClick={handleAdd} className="flex-1 px-4 py-2 safari-gradient text-white rounded-lg hover:opacity-90 transition-all">Add Package</button>
               <button onClick={async () => {
                 if (editForm.image_url && isLocalUploadRef(editForm.image_url)) {
