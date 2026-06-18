@@ -267,13 +267,14 @@ export default function SafariPackages() {
                     <input type="text" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} placeholder="Duration (e.g., 7 Days)" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                     <input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} placeholder="Price" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                     <input type="text" value={editForm.tag} onChange={(e) => setEditForm({ ...editForm, tag: e.target.value })} placeholder="Tag (e.g., Most Popular)" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
-                    <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
-                      <option value="">Select Type</option>
-                      <option value="Classic">Classic</option>
-                      <option value="Gorilla Trekking">Gorilla Trekking</option>
-                      <option value="Balloon Safaris">Balloon Safaris</option>
-                      <option value="Beach Add-Ons">Beach Add-Ons</option>
-                    </select>
+                    <input 
+                      list="safari-types" 
+                      type="text" 
+                      value={editForm.type} 
+                      onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} 
+                      placeholder="Safari Type (e.g. Classic)" 
+                      className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" 
+                    />
                     <select value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
                       <option value="">Select Country/Flag</option>
                       <option value="Kenya">Kenya 🇰🇪</option>
@@ -367,13 +368,14 @@ export default function SafariPackages() {
                 <input type="text" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} placeholder="Duration (e.g., 7 Days)" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                 <input type="number" value={editForm.price || ''} onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })} placeholder="Price" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                 <input type="text" value={editForm.tag} onChange={(e) => setEditForm({ ...editForm, tag: e.target.value })} placeholder="Tag (e.g., Most Popular)" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
-                <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
-                  <option value="">Select Type</option>
-                  <option value="Classic">Classic</option>
-                  <option value="Gorilla Trekking">Gorilla Trekking</option>
-                  <option value="Balloon Safaris">Balloon Safaris</option>
-                  <option value="Beach Add-Ons">Beach Add-Ons</option>
-                </select>
+                <input 
+                  list="safari-types" 
+                  type="text" 
+                  value={editForm.type} 
+                  onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} 
+                  placeholder="Safari Type (e.g. Classic)" 
+                  className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" 
+                />
                 <select value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700">
                   <option value="">Select Country/Flag</option>
                   <option value="Kenya">Kenya 🇰🇪</option>
@@ -449,6 +451,13 @@ export default function SafariPackages() {
           </div>
         </div>
       )}
+
+      <datalist id="safari-types">
+        <option value="Classic" />
+        <option value="Gorilla Trekking" />
+        <option value="Balloon Safaris" />
+        <option value="Beach Add-Ons" />
+      </datalist>
     </div>
   )
 }
