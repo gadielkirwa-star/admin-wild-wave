@@ -149,9 +149,12 @@ export default function SafariPackages() {
         setImagePreview(null)
         setOriginalImageUrl('')
         setShowAddModal(false)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to add package:', error)
+        alert('Failed to add package: ' + (error?.message || error))
       }
+    } else {
+      alert('Please fill in Name, Duration, and Price fields before submitting.')
     }
   }
 
@@ -187,8 +190,9 @@ export default function SafariPackages() {
       setEditingId(null)
       setOriginalImageUrl('')
       setImagePreview(null)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update package:', error)
+      alert('Failed to update package: ' + (error?.message || error))
     }
   }
 
