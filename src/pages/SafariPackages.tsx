@@ -20,7 +20,12 @@ export default function SafariPackages() {
     itinerary: '',
     includes: '',
     excludes: '',
-    published: true
+    published: true,
+    highlights: '',
+    accommodations_budget: '',
+    accommodations_midrange: '',
+    accommodations_luxury: '',
+    addons: ''
   })
 
   useEffect(() => {
@@ -43,7 +48,7 @@ export default function SafariPackages() {
       try {
         await api.createPackageAdmin(editForm)
         await loadPackages()
-        setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true })
+        setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '' })
         setShowAddModal(false)
       } catch (error) {
         console.error('Failed to add package:', error)
@@ -64,7 +69,12 @@ export default function SafariPackages() {
       itinerary: pkg.itinerary || '',
       includes: pkg.includes || '',
       excludes: pkg.excludes || '',
-      published: pkg.published !== false
+      published: pkg.published !== false,
+      highlights: pkg.highlights && Array.isArray(pkg.highlights) ? pkg.highlights.join('|') : '',
+      accommodations_budget: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[0] || '' : '',
+      accommodations_midrange: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[1] || '' : '',
+      accommodations_luxury: pkg.accommodations && Array.isArray(pkg.accommodations) ? pkg.accommodations[2] || '' : '',
+      addons: pkg.addons && Array.isArray(pkg.addons) ? pkg.addons.join('|') : ''
     })
   }
 
@@ -166,6 +176,31 @@ export default function SafariPackages() {
                   <textarea value={editForm.itinerary} onChange={(e) => setEditForm({ ...editForm, itinerary: e.target.value })} placeholder="Itinerary (separate days with |)" rows={3} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                   <textarea value={editForm.includes} onChange={(e) => setEditForm({ ...editForm, includes: e.target.value })} placeholder="Includes (separate with |)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                   <textarea value={editForm.excludes} onChange={(e) => setEditForm({ ...editForm, excludes: e.target.value })} placeholder="Excludes (separate with |)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                  
+                  <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700 space-y-4">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-safari-cream">Detailed Card Components (Visible on Main Site)</h4>
+                    
+                    <textarea value={editForm.highlights} onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })} placeholder="Highlights (separate with | e.g. Spot Lions | Photographic Safari)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Budget Lodge</label>
+                        <input type="text" value={editForm.accommodations_budget} onChange={(e) => setEditForm({ ...editForm, accommodations_budget: e.target.value })} placeholder="Budget Lodge" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Mid-Range Lodge</label>
+                        <input type="text" value={editForm.accommodations_midrange} onChange={(e) => setEditForm({ ...editForm, accommodations_midrange: e.target.value })} placeholder="Mid-Range Lodge" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Luxury Lodge</label>
+                        <input type="text" value={editForm.accommodations_luxury} onChange={(e) => setEditForm({ ...editForm, accommodations_luxury: e.target.value })} placeholder="Luxury Lodge" className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                      </div>
+                    </div>
+
+                    <textarea value={editForm.addons} onChange={(e) => setEditForm({ ...editForm, addons: e.target.value })} placeholder="Premium Add-Ons (separate with | e.g. Zanzibar Extension | Hot Air Balloon)" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                    <p className="text-[11px] text-safari-gold">Note: These components are mapped to the specific safari type and displayed in the package detail card on the main site.</p>
+                  </div>
+                  
                   <div className="flex gap-2">
                     <button onClick={() => handleSave(pkg.id)} className="flex-1 px-4 py-2 safari-gradient text-white rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"><Save size={16} />Save</button>
                     <button onClick={() => setEditingId(null)} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"><X size={16} /></button>
@@ -216,10 +251,34 @@ export default function SafariPackages() {
               <textarea value={editForm.itinerary} onChange={(e) => setEditForm({ ...editForm, itinerary: e.target.value })} placeholder="Itinerary (separate days with | e.g., Day 1: Arrival|Day 2: Safari)" rows={3} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               <textarea value={editForm.includes} onChange={(e) => setEditForm({ ...editForm, includes: e.target.value })} placeholder="Includes (separate with | e.g., All meals|Park fees|Guide)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               <textarea value={editForm.excludes} onChange={(e) => setEditForm({ ...editForm, excludes: e.target.value })} placeholder="Excludes (separate with | e.g., Flights|Insurance|Tips)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+              
+              <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700 space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-safari-cream">Detailed Card Components (Visible on Main Site)</h4>
+                
+                <textarea value={editForm.highlights} onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })} placeholder="Highlights (separate with | e.g., Panoramic views | Professional photography guide)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Budget Lodge</label>
+                    <input type="text" value={editForm.accommodations_budget} onChange={(e) => setEditForm({ ...editForm, accommodations_budget: e.target.value })} placeholder="Budget Lodge" className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Mid-Range Lodge</label>
+                    <input type="text" value={editForm.accommodations_midrange} onChange={(e) => setEditForm({ ...editForm, accommodations_midrange: e.target.value })} placeholder="Mid-Range Lodge" className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Luxury Lodge</label>
+                    <input type="text" value={editForm.accommodations_luxury} onChange={(e) => setEditForm({ ...editForm, accommodations_luxury: e.target.value })} placeholder="Luxury Lodge" className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 text-sm" />
+                  </div>
+                </div>
+
+                <textarea value={editForm.addons} onChange={(e) => setEditForm({ ...editForm, addons: e.target.value })} placeholder="Premium Add-Ons (separate with | e.g. Zanzibar Extension | Hot Air Balloon)" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                <p className="text-[11px] text-safari-gold">Note: These components are mapped to the specific safari type and displayed in the package detail card on the main site.</p>
+              </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={handleAdd} className="flex-1 px-4 py-2 safari-gradient text-white rounded-lg hover:opacity-90 transition-all">Add Package</button>
-              <button onClick={() => { setShowAddModal(false); setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">Cancel</button>
+              <button onClick={() => { setShowAddModal(false); setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">Cancel</button>
             </div>
           </div>
         </div>
