@@ -1,4 +1,4 @@
-import { Plus, Edit, Trash2, X, Save, RefreshCw } from 'lucide-react'
+import { Plus, Edit, Trash2, X, Save, RefreshCw, Upload } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import * as api from '../lib/api'
 import type { SafariPackage, SafariPackagePayload } from '../lib/types'
@@ -9,6 +9,10 @@ export default function SafariPackages() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string>('')
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+
   const [editForm, setEditForm] = useState<SafariPackagePayload>({ 
     name: '', 
     duration: '', 
@@ -28,6 +32,98 @@ export default function SafariPackages() {
     addons: '',
     country: ''
   })
+
+  const apiOrigin = api.API_URL.replace(/\/api\/?$/, '')
+  const toPreviewSrc = (value?: string | null) => {
+    const raw = String(value || '').trim()
+    if (!raw) return null
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) {
+      try {
+        const parsed = new URL(raw)
+        if (
+          parsed.protocol === 'http:' &&
+          (parsed.hostname.endsWith('.onrender.com') || window.location.protocol === 'https:')
+        ) {
+          parsed.protocol = 'https:'
+          return parsed.toString()
+        }
+      } catch {
+        // Fall back to raw URL if parsing fails.
+      }
+      return raw
+    }
+    if (raw.startsWith('/')) {
+      return `${apiOrigin}${raw}`
+    }
+    return `${apiOrigin}/${raw}`
+  }
+  const isLocalUploadRef = (value?: string | null) => {
+    const raw = String(value || '').trim()
+    if (!raw) return false
+    if (raw.startsWith('/uploads/')) return true
+    try {
+      return new URL(raw).pathname.startsWith('/uploads/')
+    } catch {
+      return false
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const localPreview = URL.createObjectURL(file)
+    setImagePreview(localPreview)
+    setUploading(true)
+
+    try {
+      const uploaded = await api.uploadImage(file)
+      const imageUrl = uploaded?.url || uploaded?.path || ''
+      setEditForm((prev) => ({ ...prev, image_url: imageUrl }))
+      setImagePreview(toPreviewSrc(imageUrl) || localPreview)
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      alert('Image upload failed. Please try again.')
+      setImagePreview(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleRemoveImage = async () => {
+    const currentImage = String(editForm.image_url || '').trim()
+    if (!currentImage) {
+      setImagePreview(null)
+      return
+    }
+
+    const shouldDelete = isLocalUploadRef(currentImage) && (!editingId || currentImage !== originalImageUrl)
+    if (shouldDelete) {
+      try {
+        await api.deleteUploadedImage(currentImage)
+      } catch (error) {
+        console.error('Failed to remove uploaded image:', error)
+      }
+    }
+
+    setEditForm((prev) => ({ ...prev, image_url: '' }))
+    setImagePreview(null)
+  }
+
+  const cancelEdit = async () => {
+    const currentImage = String(editForm.image_url || '').trim()
+    if (currentImage && currentImage !== originalImageUrl && isLocalUploadRef(currentImage)) {
+      try {
+        await api.deleteUploadedImage(currentImage)
+      } catch (error) {
+        console.error('Failed to clean up temporary image:', error)
+      }
+    }
+    setEditingId(null)
+    setOriginalImageUrl('')
+    setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '', country: '' })
+    setImagePreview(null)
+  }
 
   useEffect(() => {
     loadPackages()
@@ -50,6 +146,8 @@ export default function SafariPackages() {
         await api.createPackageAdmin(editForm)
         await loadPackages()
         setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '', country: '' })
+        setImagePreview(null)
+        setOriginalImageUrl('')
         setShowAddModal(false)
       } catch (error) {
         console.error('Failed to add package:', error)
@@ -59,6 +157,7 @@ export default function SafariPackages() {
 
   const handleEdit = (pkg: SafariPackage) => {
     setEditingId(pkg.id)
+    setOriginalImageUrl(pkg.image_url || '')
     setEditForm({ 
       name: pkg.name, 
       duration: pkg.duration || '', 
@@ -78,6 +177,7 @@ export default function SafariPackages() {
       addons: pkg.addons && Array.isArray(pkg.addons) ? pkg.addons.join('|') : '',
       country: pkg.country || ''
     })
+    setImagePreview(toPreviewSrc(pkg.image_url) || null)
   }
 
   const handleSave = async (id: number) => {
@@ -85,6 +185,8 @@ export default function SafariPackages() {
       await api.updatePackageAdmin(id, editForm)
       await loadPackages()
       setEditingId(null)
+      setOriginalImageUrl('')
+      setImagePreview(null)
     } catch (error) {
       console.error('Failed to update package:', error)
     }
@@ -182,7 +284,25 @@ export default function SafariPackages() {
                       <option value="South Sudan">South Sudan 🇸🇸</option>
                       <option value="DR Congo">DR Congo 🇨🇩</option>
                     </select>
-                    <input type="url" value={editForm.image_url} onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })} placeholder="Image URL" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                    <div className="flex items-center gap-2 p-2 border border-dashed rounded-lg dark:border-gray-700 col-span-2">
+                      <label className="flex-1 cursor-pointer text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <Upload size={16} />
+                        <span>Upload package image</span>
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      </label>
+                    </div>
+                    <input type="url" value={editForm.image_url} onChange={(e) => {
+                      const value = e.target.value
+                      setEditForm({ ...editForm, image_url: value })
+                      setImagePreview(toPreviewSrc(value) || null)
+                    }} placeholder="Or paste image URL" className="px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 col-span-2" />
+                    {imagePreview && (
+                      <div className="relative w-20 h-20 border rounded-lg overflow-hidden col-span-2">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button type="button" onClick={handleRemoveImage} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 flex items-center justify-center w-5 h-5"><X size={12} /></button>
+                      </div>
+                    )}
+                    {uploading && <p className="text-xs text-safari-gold col-span-2">Uploading image...</p>}
                   </div>
                   <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" rows={2} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
                   <textarea value={editForm.itinerary} onChange={(e) => setEditForm({ ...editForm, itinerary: e.target.value })} placeholder="Itinerary (separate days with |)" rows={3} className="w-full px-3 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
@@ -212,7 +332,7 @@ export default function SafariPackages() {
                   
                   <div className="flex gap-2">
                     <button onClick={() => handleSave(pkg.id)} className="flex-1 px-4 py-2 safari-gradient text-white rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2"><Save size={16} />Save</button>
-                    <button onClick={() => setEditingId(null)} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"><X size={16} /></button>
+                    <button onClick={() => void cancelEdit()} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"><X size={16} /></button>
                   </div>
                 </div>
               ) : (
@@ -264,7 +384,25 @@ export default function SafariPackages() {
                   <option value="South Sudan">South Sudan 🇸🇸</option>
                   <option value="DR Congo">DR Congo 🇨🇩</option>
                 </select>
-                <input type="url" value={editForm.image_url} onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })} placeholder="Image URL" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
+                <div className="flex items-center gap-2 p-2 border border-dashed rounded-lg dark:border-gray-700 col-span-2">
+                  <label className="flex-1 cursor-pointer text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    <Upload size={16} />
+                    <span>Upload package image</span>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                </div>
+                <input type="url" value={editForm.image_url} onChange={(e) => {
+                  const value = e.target.value
+                  setEditForm({ ...editForm, image_url: value })
+                  setImagePreview(toPreviewSrc(value) || null)
+                }} placeholder="Or paste image URL" className="px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700 col-span-2" />
+                {imagePreview && (
+                  <div className="relative w-20 h-20 border rounded-lg overflow-hidden col-span-2">
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <button type="button" onClick={handleRemoveImage} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 flex items-center justify-center w-5 h-5"><X size={12} /></button>
+                  </div>
+                )}
+                {uploading && <p className="text-xs text-safari-gold col-span-2">Uploading image...</p>}
               </div>
               <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" rows={2} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
               <textarea value={editForm.itinerary} onChange={(e) => setEditForm({ ...editForm, itinerary: e.target.value })} placeholder="Itinerary (separate days with | e.g., Day 1: Arrival|Day 2: Safari)" rows={3} className="w-full px-4 py-2 border rounded-lg dark:bg-safari-charcoal dark:border-gray-700" />
@@ -294,7 +432,19 @@ export default function SafariPackages() {
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={handleAdd} className="flex-1 px-4 py-2 safari-gradient text-white rounded-lg hover:opacity-90 transition-all">Add Package</button>
-              <button onClick={() => { setShowAddModal(false); setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '' }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">Cancel</button>
+              <button onClick={async () => {
+                if (editForm.image_url && isLocalUploadRef(editForm.image_url)) {
+                  try {
+                    await api.deleteUploadedImage(editForm.image_url)
+                  } catch (error) {
+                    console.error('Failed to clean up temporary image:', error)
+                  }
+                }
+                setShowAddModal(false)
+                setOriginalImageUrl('')
+                setEditForm({ name: '', duration: '', price: 0, tag: '', type: '', image_url: '', description: '', itinerary: '', includes: '', excludes: '', published: true, highlights: '', accommodations_budget: '', accommodations_midrange: '', accommodations_luxury: '', addons: '', country: '' })
+                setImagePreview(null)
+              }} className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">Cancel</button>
             </div>
           </div>
         </div>
